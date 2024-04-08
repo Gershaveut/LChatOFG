@@ -9,38 +9,22 @@ import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
-import com.gershaveut.service.chatOFG.TextSetter
-import java.net.InetAddress
+import com.google.android.material.snackbar.Snackbar
 import java.net.InetSocketAddress
-import java.net.SocketAddress
 
-
-class LoginDialogFragment(textSetter: TextSetter) : DialogFragment() {
-	private val coClient: COClient = COClient(textSetter)
+class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
+	private val coClient: COClient = COClient(onTextChange)
 	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-		val view = layoutInflater.inflate(R.layout.dialog_login, null)
-		
-		val editIpAddress = view.findViewById<EditText>(R.id.editIpAddress)
-		val editPort = view.findViewById<EditText>(R.id.editPort)
-		val editName = view.findViewById<EditText>(R.id.editName)
-		
 		val dialog = AlertDialog.Builder(activity)
 			.setTitle(R.string.login_login)
-			.setView(view)
+			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
 			.setCancelable(false)
 			.setNegativeButton(R.string.login_cancel) { dialog, _ ->
 				dialog.cancel()
 			}
-			.setPositiveButton(R.string.login_connect) { dialog, which ->
-				val ipAddress = editIpAddress.text.toString()
-				val port: Int = editPort.text.toString().toInt()
-				val name = editName.text.toString()
-				
-				coClient.name = name
-				coClient.connect(InetSocketAddress.createUnresolved(ipAddress, port))
-			}
+			.setPositiveButton(R.string.login_connect, null)
 			.create()
 		
 		dialog.setCanceledOnTouchOutside(false)
@@ -54,12 +38,40 @@ class LoginDialogFragment(textSetter: TextSetter) : DialogFragment() {
 		
 		if (dialog != null) {
 			val positiveButton = dialog.getButton(Dialog.BUTTON_POSITIVE) as Button
+			val view = dialog.window!!.decorView
+			
+			val editIpAddress = view.findViewById<EditText>(R.id.editIpAddress)
+			val editPort = view.findViewById<EditText>(R.id.editPort)
+			val editName = view.findViewById<EditText>(R.id.editName)
 			
 			positiveButton.setOnClickListener {
-				val wantToCloseDialog = false
+				fun snackbar(resId: Int) {
+					Snackbar.make(view, resId, 1000).show()
+				}
 				
-				if (wantToCloseDialog)
-					dialog.dismiss()
+				fun snackbar(text: String) {
+					Snackbar.make(view, text, 1000).show()
+				}
+				
+				val ipAddress = editIpAddress.text.toString()
+				val port = editPort.text.toString()
+				val name = editName.text.toString()
+				
+				if (coClient.socket.isConnected)
+					coClient.disconnected()
+				
+				if (ipAddress.isNotEmpty() || port.isNotEmpty() || name.isNotEmpty()) {
+					coClient.name = editName.text.toString()
+					
+					try {
+						coClient.connect(InetSocketAddress(ipAddress, port.toInt()))
+						
+						dialog.dismiss()
+					} catch (e: Exception) {
+						snackbar(e.toString())
+					}
+				} else
+					snackbar(R.string.login_error_fields)
 			}
 		}
 	}

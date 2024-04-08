@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.gershaveut.service.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-	
 	private lateinit var appBarConfiguration: AppBarConfiguration
 	private lateinit var binding: ActivityMainBinding
 	

@@ -8,4 +8,5 @@
 	<string name="login_login">Войти</string>
 	<string name="login_cancel">Отмена</string>
 	<string name="login_connect">Подключиться</string>
+	<string name="login_error_fields">Не все поля заполнены</string>
 </resources>

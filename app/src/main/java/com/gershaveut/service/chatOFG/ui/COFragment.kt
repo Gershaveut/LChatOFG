@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.gershaveut.service.chatOFG.COClient
-import com.gershaveut.service.chatOFG.TextSetter
 import com.gershaveut.service.databinding.FragmentChatOfgBinding
 
 class COFragment : Fragment() {
@@ -25,13 +23,9 @@ class COFragment : Fragment() {
 		
 		val chat: TextView = binding.editTextTextMultiLine
 		
-		val int = TextSetter {
-		
-		}
-		
-		LoginDialogFragment(TextSetter {
-		
-		}).show(parentFragmentManager, null)
+		LoginDialogFragment { text ->
+			chat.append(text)
+		}.show(parentFragmentManager, null)
 		
 		return root
 	}
