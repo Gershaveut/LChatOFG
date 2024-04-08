@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Service</string>
+	<string name="login_ip_adress">IP Адрес</string>
+	<string name="action_settings">Настройки</string>
+	<string name="login_port">Порт</string>
+	<string name="login_name">Имя</string>
+	<string name="login_login">Войти</string>
+	<string name="login_cancel">Отмена</string>
+	<string name="login_connect">Подключиться</string>
+</resources>
