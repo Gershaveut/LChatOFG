@@ -3,13 +3,19 @@ package com.gershaveut.service.chatOFG.ui
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.nfc.Tag
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.net.InetSocketAddress
 
 class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
@@ -32,6 +38,13 @@ class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 		return dialog
 	}
 	
+	fun showAndGetCOClient(manager: FragmentManager, tag: String?): COClient {
+		super.show(manager, tag)
+		
+		return coClient
+	}
+	
+	@OptIn(DelicateCoroutinesApi::class)
 	override fun onResume() {
 		super.onResume()
 		val dialog = dialog as AlertDialog?
@@ -49,10 +62,6 @@ class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 					Snackbar.make(view, resId, 1000).show()
 				}
 				
-				fun snackbar(text: String) {
-					Snackbar.make(view, text, 1000).show()
-				}
-				
 				val ipAddress = editIpAddress.text.toString()
 				val port = editPort.text.toString()
 				val name = editName.text.toString()
@@ -60,15 +69,17 @@ class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 				if (coClient.socket.isConnected)
 					coClient.disconnected()
 				
-				if (ipAddress.isNotEmpty() || port.isNotEmpty() || name.isNotEmpty()) {
+				if (ipAddress.isNotEmpty() && port.isNotEmpty() && name.isNotEmpty()) {
 					coClient.name = editName.text.toString()
 					
-					try {
-						coClient.connect(InetSocketAddress(ipAddress, port.toInt()))
+					positiveButton.isEnabled = false
+					GlobalScope.launch {
+						if (coClient.tryConnect(InetSocketAddress(ipAddress, port.toInt())))
+							dialog.dismiss()
+						else
+							snackbar(R.string.login_error_connect)
 						
-						dialog.dismiss()
-					} catch (e: Exception) {
-						snackbar(e.toString())
+						positiveButton.isEnabled = true
 					}
 				} else
 					snackbar(R.string.login_error_fields)

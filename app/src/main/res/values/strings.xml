@@ -15,4 +15,8 @@
     <string name="login_cancel">Cancel</string>
     <string name="login_connect">Connect</string>
     <string name="login_error_fields">Not all fields are filled in</string>
+    <string name="co_message">Message</string>
+    <string name="co_send">Send message</string>
+    <string name="login_error_connect">Failed to connect</string>
+    <string name="co_error_send">Failed to send message</string>
 </resources>

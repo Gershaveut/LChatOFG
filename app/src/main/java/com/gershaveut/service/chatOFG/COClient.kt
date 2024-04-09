@@ -1,10 +1,6 @@
 package com.gershaveut.service.chatOFG
 
-import android.util.Log
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
@@ -14,17 +10,33 @@ import java.net.SocketAddress
 
 class COClient(private val onTextChange: (String) -> Unit) {
 	var name: String? = null
-	val socket: Socket = Socket()
+	
+	var socket: Socket = Socket()
 	
 	private var reader: BufferedReader? = null
 	private var writer: BufferedWriter? = null
 	
 	@OptIn(DelicateCoroutinesApi::class)
-	fun connect(endpoint: SocketAddress) {
-			GlobalScope.launch {
-				socket.connect(endpoint)
-				receiveMessageHandler()
-			}
+	suspend fun connect(endpoint: SocketAddress) = coroutineScope {
+		socket = Socket()
+		
+		socket.connect(endpoint)
+		
+		GlobalScope.launch {
+			receiveMessageHandler()
+		}
+	}
+	
+	suspend fun tryConnect(endpoint: SocketAddress): Boolean {
+		try {
+			connect(endpoint)
+		} catch (e: Exception) {
+			println(e)
+			
+			return false
+		}
+		
+		return true
 	}
 	
 	fun disconnected() {
@@ -38,13 +50,25 @@ class COClient(private val onTextChange: (String) -> Unit) {
 		writer!!.flush()
 	}
 	
-	private suspend fun receiveMessageHandler() = coroutineScope{
+	fun trySendMessage(text: String): Boolean {
+		if (writer != null) {
+			try {
+				sendMessage(text)
+			} catch (_: Exception) {
+				return false
+			}
+			
+			return true
+		} else
+			return false
+	}
+	
+	private fun receiveMessageHandler() {
 		reader = BufferedReader(InputStreamReader(socket.getInputStream()))
 		writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
 		
 		writer!!.write(name!!)
 		writer!!.flush()
-		writer!!.close()
 		
 		try {
 			while (socket.isConnected) {

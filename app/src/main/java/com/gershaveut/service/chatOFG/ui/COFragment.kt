@@ -7,25 +7,43 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.gershaveut.service.R
 import com.gershaveut.service.databinding.FragmentChatOfgBinding
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class COFragment : Fragment() {
 	
 	private var _binding: FragmentChatOfgBinding? = null
 	private val binding get() = _binding!!
 	
+	@OptIn(DelicateCoroutinesApi::class)
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-		val COViewModel = ViewModelProvider(this).get(COViewModel::class.java)
+		//val COViewModel = ViewModelProvider(this)[COViewModel::class.java]
 		
 		_binding = FragmentChatOfgBinding.inflate(inflater, container, false)
 		val root: View = binding.root
 		
 		
-		val chat: TextView = binding.editTextTextMultiLine
+		val viewChat = binding.viewChat
+		val editMessage = binding.editMessage
+		val buttonSend = binding.buttonSend
+		val chatScrollView = binding.chatScrollView
 		
-		LoginDialogFragment { text ->
-			chat.append(text)
-		}.show(parentFragmentManager, null)
+		val coClient = LoginDialogFragment { text ->
+			viewChat.append(text)
+		}.showAndGetCOClient(parentFragmentManager, null)
+		
+		buttonSend.setOnClickListener {
+			chatScrollView.fullScroll(View.FOCUS_DOWN)
+			
+			GlobalScope.launch {
+				if (!coClient.trySendMessage(editMessage.text.toString()))
+					Snackbar.make(root, R.string.co_error_send, 1000).show()
+			}
+		}
 		
 		return root
 	}

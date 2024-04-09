@@ -3,7 +3,7 @@ package com.gershaveut.service
 import com.gershaveut.service.chatOFG.COClient
 import java.net.InetSocketAddress
 
-fun main() {
+suspend fun main() {
 	val coClient = COClient { text ->
 		println(text)
 	}
