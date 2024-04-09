@@ -5,18 +5,21 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.nfc.Tag
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
+import com.gershaveut.service.coTag
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import java.net.InetSocketAddress
+import kotlin.coroutines.CoroutineContext
 
 class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 	private val coClient: COClient = COClient(onTextChange)
@@ -74,12 +77,17 @@ class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 					
 					positiveButton.isEnabled = false
 					GlobalScope.launch {
-						if (coClient.tryConnect(InetSocketAddress(ipAddress, port.toInt())))
+						val ip = InetSocketAddress(ipAddress, port.toInt())
+						
+						if (coClient.tryConnect(ip)) {
+							Log.i(coTag, "Connected to $ip")
 							dialog.dismiss()
-						else
+						} else
 							snackbar(R.string.login_error_connect)
 						
-						positiveButton.isEnabled = true
+						requireActivity().runOnUiThread {
+							positiveButton.isEnabled = true
+						}
 					}
 				} else
 					snackbar(R.string.login_error_fields)

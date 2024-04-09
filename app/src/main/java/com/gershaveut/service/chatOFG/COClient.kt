@@ -79,8 +79,8 @@ class COClient(private val onTextChange: (String) -> Unit) {
 				
 				onTextChange.invoke(text)
 			}
-		} catch (e: Exception) {
-			//Log.e("error", e.toString())
+		} catch (_: Exception) {
+		
 		}
 		
 		disconnected()
