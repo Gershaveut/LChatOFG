@@ -9,8 +9,6 @@ import androidx.fragment.app.Fragment
 import com.gershaveut.service.R
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
-import com.google.android.material.sidesheet.SideSheetBehavior
-import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -22,32 +20,22 @@ class COFragment : Fragment() {
 	private val binding get() = _binding!!
 	
 	@OptIn(DelicateCoroutinesApi::class)
-	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-		//val COViewModel = ViewModelProvider(this)[COViewModel::class.java]
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
 		
-		_binding = FragmentCoBinding.inflate(inflater, container, false)
 		val root: View = binding.root
 		
+		val viewChat = binding.contentCo.viewChat
+		val editMessage = binding.contentCo.editMessage
+		val buttonSend = binding.contentCo.buttonSend
+		val chatScrollView = binding.contentCo.chatScrollView
 		
-		val viewChat = binding.appBarMain.viewChat
-		val editMessage = binding.appBarMain.editMessage
-		val buttonSend = binding.appBarMain.buttonSend
-		val chatScrollView = binding.appBarMain.chatScrollView
-		
-		/*
-		val sideSheetDialog = SideSheetDialog(requireContext())
-		sideSheetDialog.setContentView(R.layout.dialog_login)
-		
-		sideSheetDialog.show()
-		*/
-		
-		SideSheetBehavior.from(binding.coSideSheet).expand()
-		SideSheetBehavior.from(binding.coSideSheet).isDraggable = true
-		
-		val coClient = LoginDialogFragment { text ->
+		val loginDialog = LoginDialogFragment { text ->
 			Log.d(coTag, "receive_message: $text")
 			viewChat.append(text)
-		}.showAndGetCOClient(parentFragmentManager, null)
+		}
+		
+		val coClient = loginDialog.showAndGetCOClient(parentFragmentManager, null)
 		
 		buttonSend.setOnClickListener {
 			chatScrollView.fullScroll(View.FOCUS_DOWN)
@@ -62,6 +50,15 @@ class COFragment : Fragment() {
 					Log.d(coTag, "send_message: $message")
 			}
 		}
+		
+		binding.buttonDisconnect.setOnClickListener {
+			coClient.disconnect()
+		}
+	}
+	
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+		_binding = FragmentCoBinding.inflate(inflater, container, false)
+		val root: View = binding.root
 		
 		return root
 	}

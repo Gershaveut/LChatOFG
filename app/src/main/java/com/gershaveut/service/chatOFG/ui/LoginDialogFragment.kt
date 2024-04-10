@@ -3,7 +3,6 @@ package com.gershaveut.service.chatOFG.ui
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -17,13 +16,14 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.*
 import java.net.InetSocketAddress
-import kotlin.coroutines.CoroutineContext
 
 class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
-	private val coClient: COClient = COClient(onTextChange) {e ->
+	private val coClient: COClient = COClient(onTextChange, { e ->
 		Log.e(coTag, e.toString())
+	} ) {
+		Log.i(coTag, "Disconnected")
+		
 	}
 	
 	@SuppressLint("InflateParams")
@@ -70,9 +70,6 @@ class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 				val ipAddress = editIpAddress.text.toString()
 				val port = editPort.text.toString()
 				val name = editName.text.toString()
-				
-				if (coClient.socket.isConnected)
-					coClient.disconnected()
 				
 				if (ipAddress.isNotEmpty() && port.isNotEmpty() && name.isNotEmpty()) {
 					coClient.name = editName.text.toString()

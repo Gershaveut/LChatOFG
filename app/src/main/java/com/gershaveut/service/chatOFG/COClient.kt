@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val onTextChange: (String) -> Unit,  private val onException: ((Exception) -> Unit)?) {
+class COClient(private val onTextChange: (String) -> Unit,  private val onException: ((Exception) -> Unit)?,  private val onDisconnected: (() -> Unit)?) {
 	var name: String? = null
 	
 	var socket: Socket = Socket()
@@ -33,6 +33,7 @@ class COClient(private val onTextChange: (String) -> Unit,  private val onExcept
 			connect(endpoint)
 		} catch (e: Exception) {
 			onException?.invoke(e)
+			disconnect()
 			
 			return false
 		}
@@ -40,10 +41,11 @@ class COClient(private val onTextChange: (String) -> Unit,  private val onExcept
 		return true
 	}
 	
-	fun disconnected() {
+	fun disconnect() {
 		reader!!.close()
 		writer!!.close()
 		socket.close()
+		onDisconnected?.invoke()
 	}
 	
 	fun sendMessage(text: String) {
@@ -83,6 +85,6 @@ class COClient(private val onTextChange: (String) -> Unit,  private val onExcept
 			onException?.invoke(e)
 		}
 		
-		disconnected()
+		disconnect()
 	}
 }
