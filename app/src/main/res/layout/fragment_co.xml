@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+													 xmlns:app="http://schemas.android.com/apk/res-auto"
+													 android:layout_width="match_parent"
+													 android:layout_height="match_parent"
+													 xmlns:tools="http://schemas.android.com/tools">
+	
+	<include
+			android:id="@+id/app_bar_main"
+			layout="@layout/content_co"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"/>
+	<View
+			android:id="@+id/side_sheet_out"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:focusable="false"
+			android:importantForAccessibility="no"
+			android:soundEffectsEnabled="false"
+			tools:ignore="UnusedAttribute"/>
+	<LinearLayout
+			android:id="@+id/co_side_sheet"
+			app:layout_behavior="com.google.android.material.sidesheet.SideSheetBehavior"
+			style="@style/Widget.Material3.SideSheet"
+			android:layout_width="256dp"
+			android:layout_height="match_parent"
+			android:orientation="vertical">
+		<Button
+				android:text="Button"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content" android:id="@+id/button3"/>
+	</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

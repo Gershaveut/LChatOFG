@@ -22,7 +22,9 @@ import java.net.InetSocketAddress
 import kotlin.coroutines.CoroutineContext
 
 class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
-	private val coClient: COClient = COClient(onTextChange)
+	private val coClient: COClient = COClient(onTextChange) {e ->
+		Log.e(coTag, e.toString())
+	}
 	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
