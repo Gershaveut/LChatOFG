@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+			xmlns:app="http://schemas.android.com/apk/res-auto"
+			xmlns:tools="http://schemas.android.com/tools" android:id="@+id/co_navigation"
+			app:startDestination="@id/COLoginFragment">
+	
+	<fragment android:id="@+id/COLoginFragment" android:name="com.gershaveut.service.chatOFG.ui.COLoginFragment"
+			  android:label="content_co_login" tools:layout="@layout/fragment_co_login">
+		<action android:id="@+id/action_COLoginFragment_to_COFragment" app:destination="@id/COFragment"/>
+	</fragment>
+	<fragment android:id="@+id/COFragment" android:name="com.gershaveut.service.chatOFG.ui.COFragment"
+			  android:label="content_co" tools:layout="@layout/fragment_co"/>
+</navigation>

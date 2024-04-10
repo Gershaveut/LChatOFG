@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import com.gershaveut.service.R
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
@@ -25,10 +26,10 @@ class COFragment : Fragment() {
 		
 		val root: View = binding.root
 		
-		val viewChat = binding.contentCo.viewChat
-		val editMessage = binding.contentCo.editMessage
-		val buttonSend = binding.contentCo.buttonSend
-		val chatScrollView = binding.contentCo.chatScrollView
+		val viewChat = binding.viewChat
+		val editMessage = binding.editMessage
+		val buttonSend = binding.buttonSend
+		val chatScrollView = binding.chatScrollView
 		
 		val loginDialog = LoginDialogFragment { text ->
 			Log.d(coTag, "receive_message: $text")
@@ -50,6 +51,7 @@ class COFragment : Fragment() {
 					Log.d(coTag, "send_message: $message")
 			}
 		}
+		layoutInflater.inflate(R.layout.content_co, null)
 		
 		binding.buttonDisconnect.setOnClickListener {
 			coClient.disconnect()
