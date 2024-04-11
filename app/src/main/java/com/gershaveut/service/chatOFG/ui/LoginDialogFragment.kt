@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import androidx.navigation.fragment.findNavController
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.coTag
@@ -18,12 +19,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
-class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
+class LoginDialogFragment(private val coFragment: COFragment, onTextChange: (String) -> Unit) : DialogFragment() {
 	private val coClient: COClient = COClient(onTextChange, { e ->
 		Log.e(coTag, e.toString())
 	} ) {
 		Log.i(coTag, "Disconnected")
-		
 	}
 	
 	@SuppressLint("InflateParams")
@@ -33,6 +33,7 @@ class LoginDialogFragment(onTextChange: (String) -> Unit) : DialogFragment() {
 			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
 			.setCancelable(false)
 			.setNegativeButton(R.string.login_cancel) { dialog, _ ->
+				coFragment.findNavController().navigate("null")
 				dialog.cancel()
 			}
 			.setPositiveButton(R.string.login_connect, null)
