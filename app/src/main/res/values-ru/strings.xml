@@ -14,4 +14,5 @@
 	<string name="login_error_connect">Не удалось подключиться</string>
 	<string name="co_error_send">Не удалось отправить сообщение</string>
 	<string name="co_disconnect">Отключиться</string>
+	<string name="co_no_connection">Соединение не установлено</string>
 </resources>

@@ -33,14 +33,12 @@ class COFragment : Fragment() {
 		val editMessage = binding.editMessage
 		val buttonSend = binding.buttonSend
 		val chatScrollView = binding.chatScrollView
+		val viewSwitcher = binding.viewSwitcher
 		
 		val loginDialog = LoginDialogFragment(this) { text ->
 			Log.d(coTag, "receive_message: $text")
 			viewChat.append(text)
 		}
-		
-		if (coClient == null)
-			coClient = loginDialog.showAndGetCOClient(parentFragmentManager, null)
 		
 		buttonSend.setOnClickListener {
 			chatScrollView.fullScroll(View.FOCUS_DOWN)
@@ -58,6 +56,11 @@ class COFragment : Fragment() {
 		
 		binding.buttonDisconnect.setOnClickListener {
 			coClient!!.disconnect()
+		}
+		
+		binding.buttonConnect.setOnClickListener {
+			//viewSwitcher
+			coClient = loginDialog.showAndGetCOClient(parentFragmentManager, null)
 		}
 		
 		return root

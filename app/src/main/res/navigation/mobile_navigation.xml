@@ -3,13 +3,8 @@
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/mobile_navigation"
-            app:startDestination="@id/COLoginFragment">
+            app:startDestination="@id/COFragment">
     
-    <fragment android:id="@+id/COLoginFragment" android:name="com.gershaveut.service.chatOFG.ui.COLoginFragment"
-              android:label="@string/menu_chat_ofg" tools:layout="@layout/fragment_co_login">
-        <action android:id="@+id/action_COLoginFragment_to_COFragment" app:destination="@id/COFragment"
-                app:launchSingleTop="true"/>
-    </fragment>
     <fragment android:id="@+id/COFragment" android:name="com.gershaveut.service.chatOFG.ui.COFragment"
               android:label="@string/menu_chat_ofg" tools:layout="@layout/fragment_co"/>
 </navigation>
