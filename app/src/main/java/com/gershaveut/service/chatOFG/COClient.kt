@@ -1,5 +1,7 @@
 package com.gershaveut.service.chatOFG
 
+import android.util.Log
+import com.gershaveut.service.coTag
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -33,7 +35,10 @@ class COClient(private val onTextChange: (String) -> Unit,  private val onExcept
 			connect(endpoint)
 		} catch (e: Exception) {
 			onException?.invoke(e)
-			disconnect()
+			
+			withContext(Dispatchers.IO) {
+				socket.close()
+			}
 			
 			return false
 		}

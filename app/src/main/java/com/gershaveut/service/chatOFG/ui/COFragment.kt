@@ -6,6 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.ViewSwitcher
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import com.gershaveut.service.R
@@ -20,7 +24,7 @@ import kotlinx.coroutines.launch
 class COFragment : Fragment() {
 	
 	private var _binding: FragmentCoBinding? = null
-	private val binding get() = _binding!!
+	val binding get() = _binding!!
 	
 	private var coClient: COClient? = null
 	
@@ -29,10 +33,12 @@ class COFragment : Fragment() {
 		_binding = FragmentCoBinding.inflate(inflater, container, false)
 		val root: View = binding.root
 		
-		val viewChat = binding.viewChat
-		val editMessage = binding.editMessage
-		val buttonSend = binding.buttonSend
-		val chatScrollView = binding.chatScrollView
+		val coChat = binding.coContent.coChat
+		
+		val viewChat = coChat.viewChat
+		val editMessage = coChat.editMessage
+		val buttonSend = coChat.buttonSend
+		val chatScrollView = coChat.chatScrollView
 		val viewSwitcher = binding.viewSwitcher
 		
 		val loginDialog = LoginDialogFragment(this) { text ->
@@ -54,16 +60,31 @@ class COFragment : Fragment() {
 			}
 		}
 		
-		binding.buttonDisconnect.setOnClickListener {
-			coClient!!.disconnect()
+		binding.coContent.buttonDisconnect.setOnClickListener {
+			disconnect()
+			
+			GlobalScope.launch {
+				coClient!!.disconnect()
+			}
 		}
 		
-		binding.buttonConnect.setOnClickListener {
-			//viewSwitcher
+		binding.coMenu.buttonConnect.setOnClickListener {
+			viewSwitcher.showNext()
+			
 			coClient = loginDialog.showAndGetCOClient(parentFragmentManager, null)
 		}
 		
 		return root
+	}
+	
+	fun disconnect() {
+		binding.viewSwitcher.showPrevious()
+		
+		val coChat = binding.coContent.coChat
+		
+		coChat.viewChat.text = null
+		coChat.editMessage.text = null
+		binding.coContent.coContent.closeDrawers()
 	}
 	
 	override fun onDestroyView() {

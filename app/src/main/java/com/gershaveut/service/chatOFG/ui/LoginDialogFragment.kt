@@ -3,6 +3,7 @@ package com.gershaveut.service.chatOFG.ui
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -23,6 +24,7 @@ class LoginDialogFragment(private val coFragment: COFragment, onTextChange: (Str
 	private val coClient: COClient = COClient(onTextChange, { e ->
 		Log.e(coTag, e.toString())
 	} ) {
+		coFragment.disconnect()
 		Log.i(coTag, "Disconnected")
 	}
 	
@@ -33,15 +35,19 @@ class LoginDialogFragment(private val coFragment: COFragment, onTextChange: (Str
 			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
 			.setCancelable(false)
 			.setNegativeButton(R.string.login_cancel) { dialog, _ ->
-				coFragment.findNavController().navigate("null")
 				dialog.cancel()
 			}
 			.setPositiveButton(R.string.login_connect, null)
 			.create()
 		
 		dialog.setCanceledOnTouchOutside(false)
-		
 		return dialog
+	}
+	
+	override fun onCancel(dialog: DialogInterface) {
+		super.onCancel(dialog)
+		
+		coFragment.binding.viewSwitcher.showPrevious()
 	}
 	
 	fun showAndGetCOClient(manager: FragmentManager, tag: String?): COClient {
