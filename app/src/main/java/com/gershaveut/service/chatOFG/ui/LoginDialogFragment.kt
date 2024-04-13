@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.navigation.fragment.findNavController
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
+import com.gershaveut.service.chatOFG.Message
 import com.gershaveut.service.coTag
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -20,11 +21,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
-class LoginDialogFragment(private val coFragment: COFragment, onTextChange: (String) -> Unit) : DialogFragment() {
+class LoginDialogFragment(private val coFragment: COFragment, onTextChange: (Message) -> Unit) : DialogFragment() {
 	private val coClient: COClient = COClient(onTextChange, { e ->
 		Log.e(coTag, e.toString())
 	} ) {
-		coFragment.disconnect()
+		requireActivity().runOnUiThread {
+			coFragment.disconnect()
+		}
+		
 		Log.i(coTag, "Disconnected")
 	}
 	

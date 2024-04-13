@@ -3,20 +3,17 @@ package com.gershaveut.service.chatOFG
 import android.util.Log
 import com.gershaveut.service.coTag
 import kotlinx.coroutines.*
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
+import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val onTextChange: (String) -> Unit,  private val onException: ((Exception) -> Unit)?,  private val onDisconnected: (() -> Unit)?) {
+class COClient(private val onTextChange: (Message) -> Unit,  private val onException: ((Exception) -> Unit)?,  private val onDisconnected: (() -> Unit)?) {
 	var name: String? = null
 	
-	var socket: Socket = Socket()
+	private var socket: Socket = Socket()
 	
 	private var reader: BufferedReader? = null
-	private var writer: BufferedWriter? = null
+	private var writer: PrintWriter? = null
 	
 	@OptIn(DelicateCoroutinesApi::class)
 	suspend fun connect(endpoint: SocketAddress) = coroutineScope {
@@ -54,8 +51,7 @@ class COClient(private val onTextChange: (String) -> Unit,  private val onExcept
 	}
 	
 	fun sendMessage(text: String) {
-		writer!!.write(text)
-		writer!!.flush()
+		writer!!.println(text)
 	}
 	
 	fun trySendMessage(text: String): Boolean {
@@ -72,19 +68,13 @@ class COClient(private val onTextChange: (String) -> Unit,  private val onExcept
 	
 	private fun receiveMessageHandler() {
 		reader = BufferedReader(InputStreamReader(socket.getInputStream()))
-		writer = BufferedWriter(OutputStreamWriter(socket.getOutputStream()))
+		writer = PrintWriter(socket.getOutputStream(), true)
 		
-		writer!!.write(name!!)
-		writer!!.flush()
+		writer!!.println(name!!)
 		
 		try {
 			while (socket.isConnected) {
-				val text = reader!!.readLine()
-				
-				if (text.isNullOrEmpty())
-					continue
-				
-				onTextChange.invoke(text)
+				onTextChange.invoke(Message(reader!!.readLine()))
 			}
 		} catch (e: Exception) {
 			onException?.invoke(e)

@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
+import com.gershaveut.service.chatOFG.MessageType
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
 import com.google.android.material.snackbar.Snackbar
@@ -41,14 +42,18 @@ class COFragment : Fragment() {
 		val chatScrollView = coChat.chatScrollView
 		val viewSwitcher = binding.viewSwitcher
 		
-		val loginDialog = LoginDialogFragment(this) { text ->
-			Log.d(coTag, "receive_message: $text")
-			viewChat.append(text)
+		val loginDialog = LoginDialogFragment(this) { message ->
+			Log.d(coTag, "receive_message: $message")
+			
+			requireActivity().runOnUiThread {
+				when (message.messageType) {
+					else -> viewChat.append("\n" + message.text)
+				}
+			}
 		}
 		
 		buttonSend.setOnClickListener {
 			chatScrollView.fullScroll(View.FOCUS_DOWN)
-			editMessage.text = null
 			
 			GlobalScope.launch {
 				val message = editMessage.text.toString()
@@ -57,6 +62,10 @@ class COFragment : Fragment() {
 					Snackbar.make(root, R.string.co_error_send, 1000).show()
 				else
 					Log.d(coTag, "send_message: $message")
+				
+				requireActivity().runOnUiThread {
+					editMessage.text = null
+				}
 			}
 		}
 		
