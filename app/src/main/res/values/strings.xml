@@ -8,12 +8,12 @@
     <string name="action_settings">Settings</string>
 
     <string name="menu_chat_ofg" translatable="false">ChatOFG</string>
-	<string name="login_ip_adress">IP Address</string>
+	<string name="login_ip_address">IP Address</string>
     <string name="login_port">Port</string>
     <string name="login_name">Name</string>
     <string name="login_login">Login</string>
-    <string name="login_cancel">Cancel</string>
-    <string name="login_connect">Connect</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="co_connect">Connect</string>
     <string name="login_error_fields">Not all fields are filled in</string>
     <string name="co_message">Message</string>
     <string name="co_send">Send message</string>
@@ -23,4 +23,7 @@
 	<string name="co_no_connection">No connection established</string>
     <string name="co_disconnected">Disconnected</string>
     <string name="co_kick">Kick</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="text_input_title">Enter text</string>
+    <string name="co_reason">Reason</string>
 </resources>

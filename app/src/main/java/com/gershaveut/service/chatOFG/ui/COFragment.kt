@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
@@ -13,6 +14,7 @@ import com.gershaveut.service.chatOFG.Message
 import com.gershaveut.service.chatOFG.MessageType
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
+import com.gershaveut.service.ui.TextInputDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -62,16 +64,16 @@ class COFragment : Fragment() {
 				Log.e(coTag, exception.toString())
 			}
 			
-			override fun onDisconnected(cause: String?) {
+			override fun onDisconnected(reason: String?) {
 				Log.i(coTag, "Disconnected")
 				
 				requireActivity().runOnUiThread {
 					disconnect()
 					
-					if (cause != null)
+					if (reason != null)
 						AlertDialog.Builder(activity)
 							.setTitle(R.string.co_disconnected)
-							.setMessage(cause)
+							.setMessage(reason)
 							.create().show()
 				}
 			}

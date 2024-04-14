@@ -27,10 +27,10 @@ class LoginDialogFragment(private val coFragment: COFragment, private val coClie
 			.setTitle(R.string.login_login)
 			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
 			.setCancelable(false)
-			.setNegativeButton(R.string.login_cancel) { dialog, _ ->
+			.setNegativeButton(R.string.dialog_cancel) { dialog, _ ->
 				dialog.cancel()
 			}
-			.setPositiveButton(R.string.login_connect, null)
+			.setPositiveButton(R.string.co_connect, null)
 			.create()
 		
 		dialog.setCanceledOnTouchOutside(false)

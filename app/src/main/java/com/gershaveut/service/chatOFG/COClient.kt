@@ -41,11 +41,11 @@ class COClient(private val event: COClientListener) {
 		return true
 	}
 	
-	fun disconnect(cause: String?) {
+	fun disconnect(reason: String?) {
 		reader!!.close()
 		writer!!.close()
 		socket.close()
-		event.onDisconnected(cause)
+		event.onDisconnected(reason)
 	}
 	
 	fun disconnect() {
@@ -68,8 +68,8 @@ class COClient(private val event: COClientListener) {
 			return true
 	}
 	
-	fun kick(user: String, cause: String) {
-		sendMessage(Message("$cause:$user", MessageType.Kick))
+	fun kick(user: String, reason: String) {
+		sendMessage(Message("$reason:$user", MessageType.Kick))
 	}
 	
 	fun kick(user: String) {
@@ -82,14 +82,14 @@ class COClient(private val event: COClientListener) {
 		
 		writer!!.println(name!!)
 		
-		var cause: String? = "The remote host forcibly terminated the connection."
+		var reason: String? = "The remote host forcibly terminated the connection."
 		
 		try {
 			while (socket.isConnected) {
 				val message = Message.createMessageFromText(reader!!.readLine())
 				
 				if (message.equals(MessageType.Kick)) {
-					cause = message.text
+					reason = message.text
 					break
 				}
 				
@@ -100,12 +100,12 @@ class COClient(private val event: COClientListener) {
 		}
 		
 		if (!socket.isClosed)
-			disconnect(cause)
+			disconnect(reason)
 	}
 	
 	interface COClientListener {
 		fun onMessage(message: Message)
 		fun onException(exception: Exception)
-		fun onDisconnected(cause: String?)
+		fun onDisconnected(reason: String?)
 	}
 }

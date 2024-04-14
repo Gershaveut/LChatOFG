@@ -7,7 +7,8 @@
 		android:layout_height="match_parent"
 		android:id="@+id/co_content"
 		android:fitsSystemWindows="true"
-		tools:openDrawer="end">
+		tools:openDrawer="end"
+		tools:ignore="VisualLintTextFieldSize">
 	<include layout="@layout/co_chat" android:id="@+id/co_chat"/>
 	<LinearLayout
 			app:layout_behavior="com.google.android.material.sidesheet.SideSheetBehavior"

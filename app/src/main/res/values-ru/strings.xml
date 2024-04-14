@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">Service</string>
-	<string name="login_ip_adress">IP Адрес</string>
+	<string name="login_ip_address">IP Адрес</string>
 	<string name="action_settings">Настройки</string>
 	<string name="login_port">Порт</string>
 	<string name="login_name">Имя</string>
 	<string name="login_login">Войти</string>
-	<string name="login_cancel">Отмена</string>
-	<string name="login_connect">Подключиться</string>
+	<string name="dialog_cancel">Отмена</string>
+	<string name="co_connect">Подключиться</string>
 	<string name="login_error_fields">Не все поля заполнены</string>
 	<string name="co_message">Сообщение</string>
 	<string name="co_send">Отправить сообщение</string>
@@ -17,4 +17,7 @@
 	<string name="co_no_connection">Соединение не установлено</string>
 	<string name="co_disconnected">Соединение потеряно</string>
 	<string name="co_kick">Исключить</string>
+	<string name="dialog_confirm">Подтвердить</string>
+    <string name="text_input_title">Введите текст</string>
+    <string name="co_reason">Причина</string>
 </resources>

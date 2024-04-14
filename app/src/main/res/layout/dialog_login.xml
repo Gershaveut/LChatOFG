@@ -4,35 +4,45 @@
 												   xmlns:tools="http://schemas.android.com/tools"
 												   android:layout_width="match_parent"
 												   android:layout_height="match_parent">
-	<ScrollView
-			android:layout_width="212dp"
-			android:layout_height="145dp"
-			app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent" app:layout_constraintBottom_toBottomOf="parent">
-		<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-					  android:orientation="vertical">
-			<EditText
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:inputType="text"
-					android:ems="10"
-					android:id="@+id/editIpAddress"
-					android:minHeight="48dp"
-					android:hint="@string/login_ip_adress"/>
-			<EditText
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:inputType="number"
-					android:ems="10"
-					android:id="@+id/editPort"
-					android:hint="@string/login_port" android:minHeight="48dp"/>
-			<EditText
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:inputType="text"
-					android:ems="10"
-					android:id="@+id/editName"
-					android:hint="@string/login_name" android:minHeight="48dp"/>
-		</LinearLayout>
-	</ScrollView>
+	
+	<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent">
+		
+		<EditText
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:inputType="text"
+				android:ems="10"
+				android:id="@+id/editIpAddress"
+				android:minHeight="48dp"
+				android:hint="@string/login_ip_address"
+				android:autofillHints="ip" />
+		
+		<EditText
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:inputType="number"
+				android:ems="10"
+				android:id="@+id/editPort"
+				android:hint="@string/login_port"
+				android:minHeight="48dp"
+				android:autofillHints="port" />
+		
+		<EditText
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:inputType="text"
+				android:ems="10"
+				android:id="@+id/editName"
+				android:hint="@string/login_name"
+				android:minHeight="48dp"
+				android:autofillHints="username" />
+	</LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

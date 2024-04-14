@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.gershaveut.service.R
+import com.gershaveut.service.ui.TextInputDialogFragment
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -35,7 +37,10 @@ class UserAdapter(private val context: Context, val users: ArrayList<User>) : Re
 			popupMenu.setOnMenuItemClickListener {
 				when (it.itemId) {
 					MenuID.Kick.ordinal -> GlobalScope.launch {
-						COFragment.coClient!!.kick(user.name) //TODO: Request a reason
+						val textInputDialog = TextInputDialogFragment(context.getString(R.string.co_reason))
+						
+						textInputDialog.show((context as AppCompatActivity).supportFragmentManager, null)
+						textInputDialog.text?.let { text -> COFragment.coClient!!.kick(user.name, text) }
 					}
 				}
 				
