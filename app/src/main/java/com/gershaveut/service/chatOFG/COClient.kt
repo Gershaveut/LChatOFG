@@ -1,13 +1,11 @@
 package com.gershaveut.service.chatOFG
 
-import android.util.Log
-import com.gershaveut.service.coTag
 import kotlinx.coroutines.*
 import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val onTextChange: (Message) -> Unit,  private val onException: ((Exception) -> Unit)?,  private val onDisconnected: (() -> Unit)?) {
+class COClient(private val event: COClientListener) {
 	var name: String? = null
 	
 	private var socket: Socket = Socket()
@@ -31,7 +29,7 @@ class COClient(private val onTextChange: (Message) -> Unit,  private val onExcep
 		try {
 			connect(endpoint)
 		} catch (e: Exception) {
-			onException?.invoke(e)
+			event.onException(e)
 			
 			withContext(Dispatchers.IO) {
 				socket.close()
@@ -43,27 +41,39 @@ class COClient(private val onTextChange: (Message) -> Unit,  private val onExcep
 		return true
 	}
 	
-	fun disconnect() {
+	fun disconnect(cause: String?) {
 		reader!!.close()
 		writer!!.close()
 		socket.close()
-		onDisconnected?.invoke()
+		event.onDisconnected(cause)
 	}
 	
-	fun sendMessage(text: String) {
-		writer!!.println(text)
+	fun disconnect() {
+		disconnect(null)
 	}
 	
-	fun trySendMessage(text: String): Boolean {
+	fun sendMessage(message: Message) {
+		writer!!.println(message)
+	}
+	
+	fun trySendMessage(text: Message): Boolean {
 			try {
 				sendMessage(text)
 			} catch (e: Exception) {
-				onException?.invoke(e)
+				event.onException(e)
 				
 				return false
 			}
 			
 			return true
+	}
+	
+	fun kick(user: String, cause: String) {
+		sendMessage(Message("$cause:$user", MessageType.Kick))
+	}
+	
+	fun kick(user: String) {
+		kick(user, "")
 	}
 	
 	private fun receiveMessageHandler() {
@@ -72,14 +82,30 @@ class COClient(private val onTextChange: (Message) -> Unit,  private val onExcep
 		
 		writer!!.println(name!!)
 		
+		var cause: String? = "The remote host forcibly terminated the connection."
+		
 		try {
 			while (socket.isConnected) {
-				onTextChange.invoke(Message(reader!!.readLine()))
+				val message = Message.createMessageFromText(reader!!.readLine())
+				
+				if (message.equals(MessageType.Kick)) {
+					cause = message.text
+					break
+				}
+				
+				event.onMessage(message)
 			}
 		} catch (e: Exception) {
-			onException?.invoke(e)
+			event.onException(e)
 		}
 		
-		disconnect()
+		if (!socket.isClosed)
+			disconnect(cause)
+	}
+	
+	interface COClientListener {
+		fun onMessage(message: Message)
+		fun onException(exception: Exception)
+		fun onDisconnected(cause: String?)
 	}
 }

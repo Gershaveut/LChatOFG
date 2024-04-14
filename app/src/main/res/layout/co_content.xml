@@ -22,5 +22,10 @@
 				android:layout_marginStart="8dp"
 				android:layout_marginEnd="8dp"
 				android:id="@+id/button_disconnect"/>
+		<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/recycler_users"
+				app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"/>
 	</LinearLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

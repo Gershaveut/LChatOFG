@@ -15,4 +15,6 @@
 	<string name="co_error_send">Не удалось отправить сообщение</string>
 	<string name="co_disconnect">Отключиться</string>
 	<string name="co_no_connection">Соединение не установлено</string>
+	<string name="co_disconnected">Соединение потеряно</string>
+	<string name="co_kick">Исключить</string>
 </resources>

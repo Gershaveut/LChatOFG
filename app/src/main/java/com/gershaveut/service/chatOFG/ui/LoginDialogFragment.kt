@@ -10,10 +10,8 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import androidx.navigation.fragment.findNavController
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
-import com.gershaveut.service.chatOFG.Message
 import com.gershaveut.service.coTag
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -21,20 +19,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
-class LoginDialogFragment(private val coFragment: COFragment, onTextChange: (Message) -> Unit) : DialogFragment() {
-	private val coClient: COClient = COClient(onTextChange, { e ->
-		Log.e(coTag, e.toString())
-	} ) {
-		requireActivity().runOnUiThread {
-			coFragment.disconnect()
-		}
-		
-		Log.i(coTag, "Disconnected")
-	}
+class LoginDialogFragment(private val coFragment: COFragment, private val coClient: COClient) : DialogFragment() {
 	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-		val dialog = AlertDialog.Builder(activity)
+		val dialog = AlertDialog.Builder(requireActivity())
 			.setTitle(R.string.login_login)
 			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
 			.setCancelable(false)

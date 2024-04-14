@@ -21,4 +21,6 @@
     <string name="co_error_send">Failed to send message</string>
     <string name="co_disconnect">Disconnect</string>
 	<string name="co_no_connection">No connection established</string>
+    <string name="co_disconnected">Disconnected</string>
+    <string name="co_kick">Kick</string>
 </resources>
