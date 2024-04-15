@@ -17,7 +17,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 
-class UserAdapter(private val context: Context, val users: ArrayList<User>) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val context: Context, var users: ArrayList<String>) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 	override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
 		val view: View = LayoutInflater.from(viewGroup.context).inflate(R.layout.co_user, viewGroup, false)
 		return ViewHolder(view)
@@ -25,9 +25,9 @@ class UserAdapter(private val context: Context, val users: ArrayList<User>) : Re
 	
 	@OptIn(DelicateCoroutinesApi::class)
 	override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-		val user = users[position]
+		val userName = users[position]
 		
-		viewHolder.userName.text = user.name
+		viewHolder.userName.text = userName
 		
 		viewHolder.userActions.setOnClickListener {
 			val popupMenu = PopupMenu(context, viewHolder.itemView)
@@ -37,10 +37,11 @@ class UserAdapter(private val context: Context, val users: ArrayList<User>) : Re
 			popupMenu.setOnMenuItemClickListener {
 				when (it.itemId) {
 					MenuID.Kick.ordinal -> GlobalScope.launch {
-						val textInputDialog = TextInputDialogFragment(context.getString(R.string.co_reason))
+						val textInputDialog = TextInputDialogFragment(context.getString(R.string.co_reason)) { text ->
+							COFragment.coClient!!.kick(userName, text)
+						}
 						
 						textInputDialog.show((context as AppCompatActivity).supportFragmentManager, null)
-						textInputDialog.text?.let { text -> COFragment.coClient!!.kick(user.name, text) }
 					}
 				}
 				

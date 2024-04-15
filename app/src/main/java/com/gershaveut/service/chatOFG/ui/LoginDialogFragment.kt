@@ -23,6 +23,8 @@ class LoginDialogFragment(private val coFragment: COFragment, private val coClie
 	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+		super.onCreate(savedInstanceState);
+		
 		val dialog = AlertDialog.Builder(requireActivity())
 			.setTitle(R.string.login_login)
 			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
@@ -41,6 +43,13 @@ class LoginDialogFragment(private val coFragment: COFragment, private val coClie
 		super.onCancel(dialog)
 		
 		coFragment.binding.viewSwitcher.showPrevious()
+	}
+	
+	override fun onDestroyView() {
+		if (dialog != null && getRetainInstance()) {
+			dialog!!.setDismissMessage(null)
+		}
+		super.onDestroyView()
 	}
 	
 	fun showAndGetCOClient(manager: FragmentManager, tag: String?): COClient {

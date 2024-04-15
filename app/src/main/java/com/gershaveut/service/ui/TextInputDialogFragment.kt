@@ -4,36 +4,33 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleCoroutineScope
 import com.gershaveut.service.R
-import com.gershaveut.service.databinding.FragmentCoBinding
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-class TextInputDialogFragment(private val required: String) : DialogFragment() {
-	var text: String? = null
+class TextInputDialogFragment(private val required: String, private val onConfirm: (String) -> Unit) : DialogFragment() {
 	
-	private lateinit var textInput: EditText
-	
+	@OptIn(DelicateCoroutinesApi::class)
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+		val view = layoutInflater.inflate(R.layout.dialog_text_input, null)
+		
+		val textInput: EditText = view.findViewById(R.id.editTextInput)
+		textInput.hint = required
+		
 		return AlertDialog.Builder(requireActivity())
 				.setTitle(R.string.text_input_title)
-				.setView(layoutInflater.inflate(R.layout.dialog_text_input, null))
+				.setView(view)
 				.setNegativeButton(R.string.dialog_cancel, null)
 				.setPositiveButton(R.string.dialog_confirm) { _, _ ->
-					text = textInput.text.toString()
+					GlobalScope.launch {
+						onConfirm(textInput.text.toString())
+					}
 				}
 				.create()
-	}
-	
-	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-		super.onViewCreated(view, savedInstanceState)
-		
-		textInput = view.findViewById(R.id.editTextInput)
-		textInput.hint = required
 	}
 }
