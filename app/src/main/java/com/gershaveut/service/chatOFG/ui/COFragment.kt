@@ -24,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.Serializable
 
 class COFragment : Fragment() {
 	
@@ -32,14 +33,21 @@ class COFragment : Fragment() {
 	
 	private lateinit var activity: Activity
 	
+	lateinit var coClient: COClient
+	
 	private val userAdapter: UserAdapter get() = binding.coContent.recyclerUsers.adapter as UserAdapter
+	
 	//TODO: When you re-register, the screen changes
 	@OptIn(DelicateCoroutinesApi::class)
-	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+	override fun onCreateView(
+		inflater: LayoutInflater,
+		container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		
-		activity = requireActivity()
 		_binding = FragmentCoBinding.inflate(inflater, container, false)
+		activity = requireActivity()
 		
 		val root: View = binding.root
 		
@@ -62,7 +70,9 @@ class COFragment : Fragment() {
 			Snackbar.make(root, text, 1000).show()
 		}
 		
-		val loginDialog = LoginDialogFragment(this, COClient(object : COClient.COClientListener {
+		val loginDialog = LoginDialogFragment()
+		
+		coClient = COClient(object : COClient.COClientListener {
 			override fun onMessage(message: Message) {
 				Log.d(coTag, "receive_message: $message")
 				
@@ -79,6 +89,7 @@ class COFragment : Fragment() {
 								userAdapter.notifyItemInserted(users.size - 1)
 							}
 						}
+						
 						MessageType.Leave -> {
 							if (!users.equals(userName)) {
 								val index = users.indexOf(userName)
@@ -87,6 +98,7 @@ class COFragment : Fragment() {
 								userAdapter.notifyItemRemoved(index)
 							}
 						}
+						
 						else -> {
 							viewChat.append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text)
 							chatScrollView.fullScroll(View.FOCUS_DOWN)
@@ -111,10 +123,17 @@ class COFragment : Fragment() {
 						AlertDialog.Builder(activity)
 							.setTitle(R.string.co_disconnected)
 							.setMessage(reason)
+							.setPositiveButton(R.string.co_reconnect) { _, _ ->
+								viewSwitcher.showNext()
+								
+								GlobalScope.launch {
+									coClient!!.reconnect()
+								}
+							}
 							.create().show()
 				}
 			}
-		}))
+		})
 		
 		buttonSend.setOnClickListener {
 			chatScrollView.fullScroll(View.FOCUS_DOWN)
@@ -146,7 +165,7 @@ class COFragment : Fragment() {
 		binding.coMenu.buttonConnect.setOnClickListener {
 			viewSwitcher.showNext()
 			
-			coClient = loginDialog.showAndGetCOClient(parentFragmentManager, null)
+			loginDialog.show(parentFragmentManager, null)
 		}
 		
 		return root
@@ -155,7 +174,10 @@ class COFragment : Fragment() {
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putBoolean("chatOpen", binding.viewSwitcher.currentView == binding.coContent.root)
 		outState.putCharSequence("viewChat", binding.coContent.coChat.viewChat.text)
-		outState.putStringArrayList("users", (binding.coContent.recyclerUsers.adapter as UserAdapter).users)
+		outState.putStringArrayList(
+			"users",
+			(binding.coContent.recyclerUsers.adapter as UserAdapter).users
+		)
 		
 		super.onSaveInstanceState(outState)
 	}

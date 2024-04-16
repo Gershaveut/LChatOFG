@@ -20,4 +20,5 @@
 	<string name="dialog_confirm">Подтвердить</string>
     <string name="text_input_title">Введите текст</string>
     <string name="co_reason">Причина</string>
+    <string name="co_reconnect">Переподключиться</string>
 </resources>

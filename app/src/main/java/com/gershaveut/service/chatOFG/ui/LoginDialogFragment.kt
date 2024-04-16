@@ -4,12 +4,16 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.findFragment
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.coTag
@@ -19,7 +23,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
-class LoginDialogFragment(private val coFragment: COFragment, private val coClient: COClient) : DialogFragment() {
+class LoginDialogFragment : DialogFragment() {
+	private lateinit var coClient: COClient
 	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -36,26 +41,23 @@ class LoginDialogFragment(private val coFragment: COFragment, private val coClie
 			.create()
 		
 		dialog.setCanceledOnTouchOutside(false)
+		
 		return dialog
 	}
 	
+	@OptIn(DelicateCoroutinesApi::class)
 	override fun onCancel(dialog: DialogInterface) {
 		super.onCancel(dialog)
 		
-		coFragment.binding.viewSwitcher.showPrevious()
-	}
-	
-	override fun onDestroyView() {
-		if (dialog != null && getRetainInstance()) {
-			dialog!!.setDismissMessage(null)
+		GlobalScope.launch {
+			coClient.disconnect()
 		}
-		super.onDestroyView()
 	}
 	
-	fun showAndGetCOClient(manager: FragmentManager, tag: String?): COClient {
-		super.show(manager, tag)
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
 		
-		return coClient
+		coClient = view.findFragment<COFragment>().coClient
 	}
 	
 	@OptIn(DelicateCoroutinesApi::class)

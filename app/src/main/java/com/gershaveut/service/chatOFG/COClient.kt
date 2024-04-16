@@ -5,7 +5,7 @@ import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val event: COClientListener) {
+class COClient(private val event: COClientListener) : Serializable {
 	var name: String? = null
 	
 	private var socket: Socket = Socket()
@@ -41,15 +41,19 @@ class COClient(private val event: COClientListener) {
 		return true
 	}
 	
-	fun disconnect(reason: String?) {
+	suspend fun disconnect(reason: String?) = coroutineScope {
 		reader!!.close()
 		writer!!.close()
 		socket.close()
 		event.onDisconnected(reason)
 	}
 	
-	fun disconnect() {
+	suspend fun disconnect() {
 		disconnect(null)
+	}
+	
+	suspend fun reconnect() {
+		connect(socket.remoteSocketAddress)
 	}
 	
 	fun sendMessage(message: Message) {
@@ -72,11 +76,7 @@ class COClient(private val event: COClientListener) {
 		sendMessage(Message("$reason:$user", MessageType.Kick))
 	}
 	
-	fun kick(user: String) {
-		kick(user, "")
-	}
-	
-	private fun receiveMessageHandler() {
+	private suspend fun receiveMessageHandler() = coroutineScope {
 		reader = BufferedReader(InputStreamReader(socket.getInputStream()))
 		writer = PrintWriter(socket.getOutputStream(), true)
 		

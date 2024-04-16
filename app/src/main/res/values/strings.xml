@@ -26,4 +26,5 @@
     <string name="dialog_confirm">Confirm</string>
     <string name="text_input_title">Enter text</string>
     <string name="co_reason">Reason</string>
+    <string name="co_reconnect">Reconnect</string>
 </resources>
