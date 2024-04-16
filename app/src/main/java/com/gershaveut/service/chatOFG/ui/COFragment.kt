@@ -33,17 +33,11 @@ class COFragment : Fragment() {
 	
 	private lateinit var activity: Activity
 	
-	lateinit var coClient: COClient
-	
 	private val userAdapter: UserAdapter get() = binding.coContent.recyclerUsers.adapter as UserAdapter
 	
 	//TODO: When you re-register, the screen changes
 	@OptIn(DelicateCoroutinesApi::class)
-	override fun onCreateView(
-		inflater: LayoutInflater,
-		container: ViewGroup?,
-		savedInstanceState: Bundle?
-	): View {
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		
 		_binding = FragmentCoBinding.inflate(inflater, container, false)
@@ -127,7 +121,7 @@ class COFragment : Fragment() {
 								viewSwitcher.showNext()
 								
 								GlobalScope.launch {
-									coClient!!.reconnect()
+									coClient.reconnect()
 								}
 							}
 							.create().show()
@@ -142,7 +136,7 @@ class COFragment : Fragment() {
 				val message = Message(editMessage.text.toString())
 				
 				if (message.text.isNotEmpty()) {
-					if (coClient!!.trySendMessage(message))
+					if (coClient.trySendMessage(message))
 						Log.d(coTag, "send_message: $message")
 					else
 						snackbar(activity.getString(R.string.co_error_send))
@@ -155,10 +149,8 @@ class COFragment : Fragment() {
 		}
 		
 		binding.coContent.buttonDisconnect.setOnClickListener {
-			disconnect()
-			
 			GlobalScope.launch {
-				coClient!!.disconnect()
+				coClient.disconnect()
 			}
 		}
 		
@@ -174,10 +166,7 @@ class COFragment : Fragment() {
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putBoolean("chatOpen", binding.viewSwitcher.currentView == binding.coContent.root)
 		outState.putCharSequence("viewChat", binding.coContent.coChat.viewChat.text)
-		outState.putStringArrayList(
-			"users",
-			(binding.coContent.recyclerUsers.adapter as UserAdapter).users
-		)
+		outState.putStringArrayList("users", (binding.coContent.recyclerUsers.adapter as UserAdapter).users)
 		
 		super.onSaveInstanceState(outState)
 	}
@@ -209,6 +198,6 @@ class COFragment : Fragment() {
 	}
 	
 	companion object {
-		var coClient: COClient? = null
+		lateinit var coClient: COClient
 	}
 }

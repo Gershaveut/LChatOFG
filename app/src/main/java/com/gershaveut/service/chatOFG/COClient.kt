@@ -13,6 +13,7 @@ class COClient(private val event: COClientListener) : Serializable {
 	private var reader: BufferedReader? = null
 	private var writer: PrintWriter? = null
 	
+	@Throws(IOException::class)
 	@OptIn(DelicateCoroutinesApi::class)
 	suspend fun connect(endpoint: SocketAddress) = coroutineScope {
 		if (socket.isClosed)
@@ -25,12 +26,10 @@ class COClient(private val event: COClientListener) : Serializable {
 		}
 	}
 	
-	suspend fun tryConnect(endpoint: SocketAddress): Boolean {
+	suspend fun tryConnect(endpoint: SocketAddress) : Boolean {
 		try {
 			connect(endpoint)
-		} catch (e: Exception) {
-			event.onException(e)
-			
+		} catch (_: Exception) {
 			withContext(Dispatchers.IO) {
 				socket.close()
 			}
@@ -41,21 +40,39 @@ class COClient(private val event: COClientListener) : Serializable {
 		return true
 	}
 	
+	@Throws(IOException::class, NullPointerException::class)
 	suspend fun disconnect(reason: String?) = coroutineScope {
+		event.onDisconnected(reason)
+		
+		socket.close()
 		reader!!.close()
 		writer!!.close()
-		socket.close()
-		event.onDisconnected(reason)
 	}
 	
 	suspend fun disconnect() {
 		disconnect(null)
 	}
 	
+	suspend fun tryDisconnect(reason: String?) : Boolean {
+		try {
+			disconnect(reason)
+		} catch (_: Exception) {
+			return false
+		}
+		
+		return true
+	}
+	
+	suspend fun tryDisconnect() : Boolean {
+		return tryDisconnect(null)
+	}
+	
+	@Throws(IOException::class)
 	suspend fun reconnect() {
 		connect(socket.remoteSocketAddress)
 	}
 	
+	@Throws(NullPointerException::class)
 	fun sendMessage(message: Message) {
 		writer!!.println(message)
 	}
@@ -63,15 +80,14 @@ class COClient(private val event: COClientListener) : Serializable {
 	fun trySendMessage(text: Message): Boolean {
 			try {
 				sendMessage(text)
-			} catch (e: Exception) {
-				event.onException(e)
-				
+			} catch (_: Exception) {
 				return false
 			}
 			
 			return true
 	}
 	
+	@Throws(NullPointerException::class)
 	fun kick(user: String, reason: String) {
 		sendMessage(Message("$reason:$user", MessageType.Kick))
 	}

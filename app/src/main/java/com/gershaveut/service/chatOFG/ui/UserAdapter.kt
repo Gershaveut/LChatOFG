@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.gershaveut.service.R
+import com.gershaveut.service.chatOFG.ui.COFragment.Companion.coClient
 import com.gershaveut.service.ui.TextInputDialogFragment
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -37,9 +38,11 @@ class UserAdapter(private val context: Context, var users: ArrayList<String>) : 
 			popupMenu.setOnMenuItemClickListener {
 				when (it.itemId) {
 					MenuID.Kick.ordinal -> GlobalScope.launch {
-						val textInputDialog = TextInputDialogFragment(context.getString(R.string.co_reason)) { text ->
-							COFragment.coClient!!.kick(userName, text)
-						}
+						val textInputDialog = TextInputDialogFragment(context.getString(R.string.co_reason), object : TextInputDialogFragment.OnConfirmListener {
+							override fun onConfirm(text: String) {
+								coClient.kick(userName, text)
+							}
+						})
 						
 						textInputDialog.show((context as AppCompatActivity).supportFragmentManager, null)
 					}
