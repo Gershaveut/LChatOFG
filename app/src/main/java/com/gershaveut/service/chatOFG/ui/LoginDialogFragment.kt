@@ -9,8 +9,11 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.gershaveut.service.R
-import com.gershaveut.service.chatOFG.ui.COFragment.Companion.coClient
+import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.coTag
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
 class LoginDialogFragment : DialogFragment() {
+	private lateinit var coClient: COClient
 	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -61,6 +65,8 @@ class LoginDialogFragment : DialogFragment() {
 			val editPort = view.findViewById<EditText>(R.id.editPort)
 			val editName = view.findViewById<EditText>(R.id.editName)
 			
+			coClient = (parentFragmentManager.primaryNavigationFragment as COFragment).coClient
+			
 			positiveButton.setOnClickListener {
 				fun snackbar(resId: Int) {
 					Snackbar.make(view, resId, 1000).show()
@@ -87,8 +93,12 @@ class LoginDialogFragment : DialogFragment() {
 							positiveButton.isEnabled = true
 						}
 					}
-				} else
+				} else {
 					snackbar(R.string.login_error_fields)
+					editIpAddress.append("192.168.1.120")
+					editPort.append("7500")
+					editName.append("User")
+				}
 			}
 		}
 	}

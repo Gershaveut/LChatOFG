@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.gershaveut.service.R
-import com.gershaveut.service.chatOFG.ui.COFragment.Companion.coClient
+import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.ui.TextInputDialogFragment
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 
 
 class UserAdapter(private val context: Context, var users: ArrayList<String>) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+	lateinit var coClient: COClient
+	
 	override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
 		val view: View = LayoutInflater.from(viewGroup.context).inflate(R.layout.co_user, viewGroup, false)
 		return ViewHolder(view)

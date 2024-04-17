@@ -25,23 +25,22 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.Serializable
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 class COFragment : Fragment() {
 	
 	private var _binding: FragmentCoBinding? = null
 	val binding get() = _binding!!
 	
-	private lateinit var activity: Activity
+	lateinit var coClient: COClient
 	
-	private val userAdapter: UserAdapter get() = binding.coContent.recyclerUsers.adapter as UserAdapter
-	
-	//TODO: When you re-register, the screen changes
 	@OptIn(DelicateCoroutinesApi::class)
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		
 		_binding = FragmentCoBinding.inflate(inflater, container, false)
-		activity = requireActivity()
 		
 		val root: View = binding.root
 		
@@ -53,26 +52,21 @@ class COFragment : Fragment() {
 		val chatScrollView = coChat.chatScrollView
 		val viewSwitcher = binding.viewSwitcher
 		
-		if (savedInstanceState != null) {
-			if (savedInstanceState.getBoolean("chatOpen"))
-				viewSwitcher.showNext()
-			
-			viewChat.text = savedInstanceState.getCharSequence("viewChat")
-		}
-		
 		fun snackbar(text: String) {
 			Snackbar.make(root, text, 1000).show()
 		}
 		
 		val loginDialog = LoginDialogFragment()
 		
-		coClient = COClient(object : COClient.COClientListener {
+		val userAdapter = UserAdapter(requireActivity(), savedInstanceState?.getStringArrayList("users") ?: ArrayList())
+		
+		coClient = COClient(object : COClient.Listener {
 			override fun onMessage(message: Message) {
 				Log.d(coTag, "receive_message: $message")
 				
 				val userName = message.text.split(' ')[0]
 				
-				activity.runOnUiThread {
+				requireActivity().runOnUiThread {
 					val users = userAdapter.users
 					
 					when (message.messageType) {
@@ -110,7 +104,7 @@ class COFragment : Fragment() {
 			override fun onDisconnected(reason: String?) {
 				Log.i(coTag, "Disconnected")
 				
-				activity.runOnUiThread {
+				requireActivity().runOnUiThread {
 					disconnect()
 					
 					if (reason != null)
@@ -129,6 +123,9 @@ class COFragment : Fragment() {
 			}
 		})
 		
+		userAdapter.coClient = coClient
+		binding.coContent.recyclerUsers.adapter = userAdapter
+		
 		buttonSend.setOnClickListener {
 			chatScrollView.fullScroll(View.FOCUS_DOWN)
 			
@@ -139,10 +136,10 @@ class COFragment : Fragment() {
 					if (coClient.trySendMessage(message))
 						Log.d(coTag, "send_message: $message")
 					else
-						snackbar(activity.getString(R.string.co_error_send))
+						snackbar(requireActivity().getString(R.string.co_error_send))
 				}
 				
-				activity.runOnUiThread {
+				requireActivity().runOnUiThread {
 					editMessage.text = null
 				}
 			}
@@ -160,6 +157,23 @@ class COFragment : Fragment() {
 			loginDialog.show(parentFragmentManager, null)
 		}
 		
+		if (savedInstanceState != null) {
+			if (savedInstanceState.getBoolean("chatOpen"))
+				viewSwitcher.showNext()
+			
+			viewChat.text = savedInstanceState.getCharSequence("viewChat")
+			
+			if (!coClient.socket.isConnected) {
+				val coClientData = savedInstanceState.getStringArrayList("coClientData")
+				
+				coClient.name = coClientData!![1]
+				
+				GlobalScope.launch {
+					coClient.connect(InetSocketAddress(InetAddress.getByName(coClientData[0])))
+				}
+			}
+		}
+		
 		return root
 	}
 	
@@ -168,15 +182,9 @@ class COFragment : Fragment() {
 		outState.putCharSequence("viewChat", binding.coContent.coChat.viewChat.text)
 		outState.putStringArrayList("users", (binding.coContent.recyclerUsers.adapter as UserAdapter).users)
 		
-		super.onSaveInstanceState(outState)
-	}
-	
-	override fun onViewStateRestored(savedInstanceState: Bundle?) {
-		if (savedInstanceState != null) {
-			userAdapter.users = savedInstanceState.getStringArrayList("users")!!
-		}
+		outState.putStringArrayList("coClientData", arrayListOf(coClient.socket.remoteSocketAddress.toString(), coClient.name))
 		
-		super.onViewStateRestored(savedInstanceState)
+		super.onSaveInstanceState(outState)
 	}
 	
 	@SuppressLint("NotifyDataSetChanged")
@@ -188,6 +196,9 @@ class COFragment : Fragment() {
 		coChat.viewChat.text = null
 		coChat.editMessage.text = null
 		binding.coContent.coContent.closeDrawers()
+		
+		val userAdapter: UserAdapter = binding.coContent.recyclerUsers.adapter as UserAdapter
+		
 		userAdapter.users.clear()
 		userAdapter.notifyDataSetChanged()
 	}
@@ -195,9 +206,5 @@ class COFragment : Fragment() {
 	override fun onDestroyView() {
 		super.onDestroyView()
 		_binding = null
-	}
-	
-	companion object {
-		lateinit var coClient: COClient
 	}
 }

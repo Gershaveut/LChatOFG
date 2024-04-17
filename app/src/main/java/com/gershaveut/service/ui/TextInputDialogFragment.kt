@@ -43,13 +43,15 @@ class TextInputDialogFragment() : DialogFragment() {
 		textInput = view.findViewById(R.id.editTextInput)
 		textInput.hint = savedInstanceState?.getString("required") ?: required
 		
+		onConfirmListener = savedInstanceState?.getSerializable("onConfirmListener", OnConfirmListener::class.java) ?: onConfirmListener
+		
 		return AlertDialog.Builder(requireActivity())
 				.setTitle(R.string.text_input_title)
 				.setView(view)
 				.setNegativeButton(R.string.dialog_cancel, null)
 				.setPositiveButton(R.string.dialog_confirm) { _, _ ->
 					GlobalScope.launch {
-						(savedInstanceState?.getSerializable("onConfirmListener", OnConfirmListener::class.java) ?: onConfirmListener).onConfirm(textInput.text.toString())
+						onConfirmListener.onConfirm(textInput.text.toString())
 					}
 				}
 				.create()

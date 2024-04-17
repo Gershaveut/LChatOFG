@@ -5,10 +5,10 @@ import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val event: COClientListener) : Serializable {
+class COClient(private val event: Listener) : Serializable {
 	var name: String? = null
 	
-	private var socket: Socket = Socket()
+	var socket: Socket = Socket()
 	
 	private var reader: BufferedReader? = null
 	private var writer: PrintWriter? = null
@@ -119,7 +119,7 @@ class COClient(private val event: COClientListener) : Serializable {
 			disconnect(reason)
 	}
 	
-	interface COClientListener {
+	interface Listener {
 		fun onMessage(message: Message)
 		fun onException(exception: Exception)
 		fun onDisconnected(reason: String?)

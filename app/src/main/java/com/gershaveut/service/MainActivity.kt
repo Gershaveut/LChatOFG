@@ -37,8 +37,6 @@ class MainActivity : AppCompatActivity() {
 		)
 		setupActionBarWithNavController(navController, appBarConfiguration)
 		navView.setupWithNavController(navController)
-		
-		findViewById<RecyclerView>(R.id.recycler_users).adapter = UserAdapter(this, ArrayList())
 	}
 	
 	override fun onCreateOptionsMenu(menu: Menu): Boolean {
