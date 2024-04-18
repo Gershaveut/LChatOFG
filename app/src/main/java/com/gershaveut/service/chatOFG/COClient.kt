@@ -12,6 +12,11 @@ class COClient(private val event: Listener) : Serializable {
 	
 	private var reader: BufferedReader? = null
 	private var writer: PrintWriter? = null
+	private var connected: Boolean = false
+	private var connecting: Boolean = false
+	
+	val isConnected get() = connected
+	val isConnecting get() = connecting
 	
 	@Throws(IOException::class)
 	@OptIn(DelicateCoroutinesApi::class)
@@ -19,7 +24,15 @@ class COClient(private val event: Listener) : Serializable {
 		if (socket.isClosed)
 			socket = Socket()
 		
-		socket.connect(endpoint)
+		connecting = true
+		
+		try {
+			socket.connect(endpoint)
+		} finally {
+			connecting = false
+		}
+		
+		connected = true
 		
 		GlobalScope.launch {
 			receiveMessageHandler()
@@ -40,13 +53,29 @@ class COClient(private val event: Listener) : Serializable {
 		return true
 	}
 	
+	suspend fun silentDisconnect() = coroutineScope {
+		socket.close()
+		reader!!.close()
+		writer!!.close()
+		
+		connected = false
+	}
+	
+	suspend fun trySilentDisconnect() : Boolean {
+		try {
+			silentDisconnect()
+		} catch (_: Exception) {
+			return false
+		}
+		
+		return true
+	}
+	
 	@Throws(IOException::class, NullPointerException::class)
 	suspend fun disconnect(reason: String?) = coroutineScope {
 		event.onDisconnected(reason)
 		
-		socket.close()
-		reader!!.close()
-		writer!!.close()
+		silentDisconnect()
 	}
 	
 	suspend fun disconnect() {
@@ -88,7 +117,7 @@ class COClient(private val event: Listener) : Serializable {
 	}
 	
 	@Throws(NullPointerException::class)
-	fun kick(user: String, reason: String) {
+	suspend fun kick(user: String, reason: String) = coroutineScope {
 		sendMessage(Message("$reason:$user", MessageType.Kick))
 	}
 	

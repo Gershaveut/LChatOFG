@@ -19,8 +19,6 @@ import kotlinx.coroutines.launch
 
 
 class UserAdapter(private val context: Context, var users: ArrayList<String>) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
-	lateinit var coClient: COClient
-	
 	override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
 		val view: View = LayoutInflater.from(viewGroup.context).inflate(R.layout.co_user, viewGroup, false)
 		return ViewHolder(view)
@@ -40,13 +38,7 @@ class UserAdapter(private val context: Context, var users: ArrayList<String>) : 
 			popupMenu.setOnMenuItemClickListener {
 				when (it.itemId) {
 					MenuID.Kick.ordinal -> GlobalScope.launch {
-						val textInputDialog = TextInputDialogFragment(context.getString(R.string.co_reason), object : TextInputDialogFragment.OnConfirmListener {
-							override fun onConfirm(text: String) {
-								coClient.kick(userName, text)
-							}
-						})
-						
-						textInputDialog.show((context as AppCompatActivity).supportFragmentManager, null)
+						KickDialogFragment(userName).show((context as AppCompatActivity).supportFragmentManager, null)
 					}
 				}
 				

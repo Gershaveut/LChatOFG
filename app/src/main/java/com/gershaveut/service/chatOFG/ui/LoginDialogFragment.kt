@@ -1,10 +1,12 @@
 package com.gershaveut.service.chatOFG.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Debug
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -15,9 +17,12 @@ import androidx.navigation.fragment.navArgs
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.coTag
+import com.gershaveut.service.debug
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
@@ -28,7 +33,7 @@ class LoginDialogFragment : DialogFragment() {
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 		super.onCreate(savedInstanceState)
 		
-		val dialog = AlertDialog.Builder(requireActivity())
+		return AlertDialog.Builder(requireActivity())
 			.setTitle(R.string.login_login)
 			.setView(layoutInflater.inflate(R.layout.dialog_login, null))
 			.setCancelable(false)
@@ -37,19 +42,6 @@ class LoginDialogFragment : DialogFragment() {
 			}
 			.setPositiveButton(R.string.co_connect, null)
 			.create()
-		
-		dialog.setCanceledOnTouchOutside(false)
-		
-		return dialog
-	}
-	
-	@OptIn(DelicateCoroutinesApi::class)
-	override fun onCancel(dialog: DialogInterface) {
-		super.onCancel(dialog)
-		
-		GlobalScope.launch {
-			coClient.tryDisconnect()
-		}
 	}
 	
 	@OptIn(DelicateCoroutinesApi::class)
@@ -59,13 +51,16 @@ class LoginDialogFragment : DialogFragment() {
 		
 		if (dialog != null) {
 			val positiveButton = dialog.getButton(Dialog.BUTTON_POSITIVE) as Button
+			
 			val view = dialog.window!!.decorView
 			
 			val editIpAddress = view.findViewById<EditText>(R.id.editIpAddress)
 			val editPort = view.findViewById<EditText>(R.id.editPort)
 			val editName = view.findViewById<EditText>(R.id.editName)
 			
-			coClient = (parentFragmentManager.primaryNavigationFragment as COFragment).coClient
+			val coFragment = parentFragmentManager.primaryNavigationFragment as COFragment
+			
+			coClient = coFragment.coClient
 			
 			positiveButton.setOnClickListener {
 				fun snackbar(resId: Int) {
@@ -79,25 +74,28 @@ class LoginDialogFragment : DialogFragment() {
 				if (ipAddress.isNotEmpty() && port.isNotEmpty() && name.isNotEmpty()) {
 					coClient.name = editName.text.toString()
 					
-					positiveButton.isEnabled = false
 					GlobalScope.launch {
 						val ip = InetSocketAddress(ipAddress, port.toInt())
 						
 						if (coClient.tryConnect(ip)) {
 							Log.i(coTag, "Connected to $ip")
+							
+							activity?.runOnUiThread {
+								coFragment.binding.viewSwitcher.showNext()
+							}
+							
 							dialog.dismiss()
 						} else
 							snackbar(R.string.login_error_connect)
-						
-						requireActivity().runOnUiThread {
-							positiveButton.isEnabled = true
-						}
 					}
 				} else {
 					snackbar(R.string.login_error_fields)
-					editIpAddress.append("192.168.1.120")
-					editPort.append("7500")
-					editName.append("User")
+					
+					if (debug) {
+						editIpAddress.append("192.168.1.120")
+						editPort.append("7500")
+						editName.append("User")
+					}
 				}
 			}
 		}
