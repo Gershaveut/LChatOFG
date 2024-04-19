@@ -9,10 +9,11 @@ import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.gershaveut.service.MainActivity
 import com.gershaveut.service.R
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
@@ -22,7 +23,6 @@ class UserAdapter(private val context: Context, var users: ArrayList<String>) : 
 		return ViewHolder(view)
 	}
 	
-	@OptIn(DelicateCoroutinesApi::class)
 	override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 		val userName = users[position]
 		
@@ -35,7 +35,7 @@ class UserAdapter(private val context: Context, var users: ArrayList<String>) : 
 			
 			popupMenu.setOnMenuItemClickListener {
 				when (it.itemId) {
-					MenuID.Kick.ordinal -> GlobalScope.launch {
+					MenuID.Kick.ordinal -> (context as MainActivity).lifecycleScope.launch(Dispatchers.IO) {
 						KickDialogFragment(userName).show((context as AppCompatActivity).supportFragmentManager, null)
 					}
 				}

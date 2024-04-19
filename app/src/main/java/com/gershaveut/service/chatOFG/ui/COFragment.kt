@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.chatOFG.Message
@@ -15,14 +16,14 @@ import com.gershaveut.service.chatOFG.MessageType
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
+import java.net.SocketAddress
 
 class COFragment : Fragment(), COClient.Listener {
 	private var _binding: FragmentCoBinding? = null
-	val binding get() = _binding!!
+	private val binding get() = _binding!!
 	
 	lateinit var coClient: COClient
 	
@@ -30,7 +31,6 @@ class COFragment : Fragment(), COClient.Listener {
 		Snackbar.make(binding.root, text, 1000).show()
 	}
 	
-	@OptIn(DelicateCoroutinesApi::class)
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		super.onCreateView(inflater, container, savedInstanceState)
 		
@@ -40,11 +40,9 @@ class COFragment : Fragment(), COClient.Listener {
 		
 		val coChat = binding.coContent.coChat
 		
-		val viewChat = coChat.viewChat
 		val editMessage = coChat.editMessage
 		val buttonSend = coChat.buttonSend
 		val chatScrollView = coChat.chatScrollView
-		val viewSwitcher = binding.viewSwitcher
 		
 		val loginDialog = LoginDialogFragment()
 		
@@ -55,7 +53,7 @@ class COFragment : Fragment(), COClient.Listener {
 		binding.coContent.recyclerUsers.adapter = userAdapter
 		
 		buttonSend.setOnClickListener {
-			GlobalScope.launch {
+			lifecycleScope.launch(Dispatchers.IO) {
 				val message = Message(editMessage.text.toString())
 				
 				if (message.text.isNotEmpty()) {
@@ -73,7 +71,7 @@ class COFragment : Fragment(), COClient.Listener {
 		}
 		
 		binding.coContent.buttonDisconnect.setOnClickListener {
-			GlobalScope.launch {
+			lifecycleScope.launch(Dispatchers.IO) {
 				coClient.disconnect()
 			}
 		}
@@ -84,22 +82,25 @@ class COFragment : Fragment(), COClient.Listener {
 			loginDialog.show(parentFragmentManager, null)
 		}
 		
+		return root
+	}
+	
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+		
 		if (savedInstanceState != null) {
-			viewChat.text = savedInstanceState.getCharSequence("viewChat")
+			binding.coContent.coChat.viewChat.text = savedInstanceState.getCharSequence("viewChat")
 			
 			val coClientData = savedInstanceState.getStringArrayList("coClientData")
 			
 			if (coClientData != null) {
 				coClient.name = coClientData[2]
 				
-				GlobalScope.launch {
-					if (coClient.tryConnect(InetSocketAddress(coClientData[0], coClientData[1].toInt())))
-						viewSwitcher.showNext()
+				lifecycleScope.launch(Dispatchers.IO) {
+					coClient.tryConnect(InetSocketAddress(coClientData[0], coClientData[1].toInt()))
 				}
 			}
 		}
-		
-		return root
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {
@@ -125,11 +126,10 @@ class COFragment : Fragment(), COClient.Listener {
 		_binding = null
 	}
 	
-	@OptIn(DelicateCoroutinesApi::class)
 	override fun onDestroy() {
 		super.onDestroy()
 		
-		GlobalScope.launch {
+		lifecycleScope.launch(Dispatchers.IO) {
 			if (coClient.isConnected)
 				coClient.silentDisconnect()
 		}
@@ -174,16 +174,21 @@ class COFragment : Fragment(), COClient.Listener {
 		}
 	}
 	
-	override fun onException(exception: Exception) {
-		Log.e(coTag, exception.toString())
+	override fun onException(exception: String) {
+		Log.e(coTag, exception)
+	}
+	
+	override fun onConnected(endpoint: SocketAddress) {
+		requireActivity().runOnUiThread {
+			binding.viewSwitcher.showNext()
+		}
 	}
 	
 	@SuppressLint("NotifyDataSetChanged")
-	@OptIn(DelicateCoroutinesApi::class)
 	override fun onDisconnected(reason: String?) {
 		Log.i(coTag, "Disconnected")
 		
-		requireActivity().runOnUiThread {
+		activity?.runOnUiThread {
 			binding.viewSwitcher.showPrevious()
 			
 			val coChat = binding.coContent.coChat
@@ -202,9 +207,7 @@ class COFragment : Fragment(), COClient.Listener {
 					.setTitle(R.string.co_disconnected)
 					.setMessage(reason)
 					.setPositiveButton(R.string.co_reconnect) { _, _ ->
-						binding.viewSwitcher.showNext()
-						
-						GlobalScope.launch {
+						lifecycleScope.launch(Dispatchers.IO) {
 							coClient.reconnect()
 						}
 					}

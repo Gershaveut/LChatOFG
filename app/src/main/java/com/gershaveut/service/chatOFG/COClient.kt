@@ -1,14 +1,16 @@
 package com.gershaveut.service.chatOFG
 
+import com.gershaveut.service.detailedException
 import kotlinx.coroutines.*
 import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val event: Listener) {
+class COClient(private val listener: Listener?) {
 	var name: String? = null
-	
 	var socket: Socket = Socket()
+	@OptIn(DelicateCoroutinesApi::class)
+	private val receiveMessageHandler = newFixedThreadPoolContext(1, "ReceiveMessageHandler")
 	
 	private var reader: BufferedReader? = null
 	private var writer: PrintWriter? = null
@@ -19,7 +21,6 @@ class COClient(private val event: Listener) {
 	val isConnecting get() = connecting
 	
 	@Throws(IOException::class)
-	@OptIn(DelicateCoroutinesApi::class)
 	suspend fun connect(endpoint: SocketAddress) = coroutineScope {
 		if (socket.isClosed)
 			socket = Socket()
@@ -32,17 +33,21 @@ class COClient(private val event: Listener) {
 			connecting = false
 		}
 		
+		listener?.onConnected(endpoint)
 		connected = true
 		
-		GlobalScope.launch {
-			receiveMessageHandler()
+		Thread { receiveMessageHandler() }.apply {
+			name = "ReceiveMessageHandler"
+			start()
 		}
 	}
 	
 	suspend fun tryConnect(endpoint: SocketAddress): Boolean {
 		try {
 			connect(endpoint)
-		} catch (_: Exception) {
+		} catch (e: Exception) {
+			listener?.onException(detailedException(e))
+			
 			withContext(Dispatchers.IO) {
 				socket.close()
 			}
@@ -53,7 +58,7 @@ class COClient(private val event: Listener) {
 		return true
 	}
 	
-	suspend fun silentDisconnect() = coroutineScope {
+	fun silentDisconnect() {
 		socket.close()
 		reader!!.close()
 		writer!!.close()
@@ -61,10 +66,12 @@ class COClient(private val event: Listener) {
 		connected = false
 	}
 	
-	suspend fun trySilentDisconnect(): Boolean {
+	fun trySilentDisconnect(): Boolean {
 		try {
 			silentDisconnect()
-		} catch (_: Exception) {
+		} catch (e: Exception) {
+			listener?.onException(detailedException(e))
+			
 			return false
 		}
 		
@@ -72,27 +79,29 @@ class COClient(private val event: Listener) {
 	}
 	
 	@Throws(IOException::class, NullPointerException::class)
-	suspend fun disconnect(reason: String?) = coroutineScope {
-		event.onDisconnected(reason)
+	fun disconnect(reason: String?) {
+		listener?.onDisconnected(reason)
 		
 		silentDisconnect()
 	}
 	
-	suspend fun disconnect() {
+	fun disconnect() {
 		disconnect(null)
 	}
 	
-	suspend fun tryDisconnect(reason: String?): Boolean {
+	fun tryDisconnect(reason: String?): Boolean {
 		try {
 			disconnect(reason)
-		} catch (_: Exception) {
+		} catch (e: Exception) {
+			listener?.onException(detailedException(e))
+			
 			return false
 		}
 		
 		return true
 	}
 	
-	suspend fun tryDisconnect(): Boolean {
+	fun tryDisconnect(): Boolean {
 		return tryDisconnect(null)
 	}
 	
@@ -109,7 +118,9 @@ class COClient(private val event: Listener) {
 	fun trySendMessage(text: Message): Boolean {
 		try {
 			sendMessage(text)
-		} catch (_: Exception) {
+		} catch (e: Exception) {
+			listener?.onException(detailedException(e))
+			
 			return false
 		}
 		
@@ -117,11 +128,11 @@ class COClient(private val event: Listener) {
 	}
 	
 	@Throws(NullPointerException::class)
-	suspend fun kick(user: String, reason: String) = coroutineScope {
+	fun kick(user: String, reason: String) {
 		sendMessage(Message("$reason:$user", MessageType.Kick))
 	}
 	
-	private suspend fun receiveMessageHandler() = coroutineScope {
+	private fun receiveMessageHandler() {
 		reader = BufferedReader(InputStreamReader(socket.getInputStream()))
 		writer = PrintWriter(socket.getOutputStream(), true)
 		
@@ -138,10 +149,10 @@ class COClient(private val event: Listener) {
 					break
 				}
 				
-				event.onMessage(message)
+				listener?.onMessage(message)
 			}
 		} catch (e: Exception) {
-			event.onException(e)
+			listener?.onException(detailedException(e))
 		}
 		
 		if (!socket.isClosed)
@@ -150,7 +161,8 @@ class COClient(private val event: Listener) {
 	
 	interface Listener {
 		fun onMessage(message: Message)
-		fun onException(exception: Exception)
+		fun onException(exception: String)
+		fun onConnected(endpoint: SocketAddress)
 		fun onDisconnected(reason: String?)
 	}
 }

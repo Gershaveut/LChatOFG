@@ -8,13 +8,13 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.coTag
 import com.gershaveut.service.debug
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
@@ -36,7 +36,6 @@ class LoginDialogFragment : DialogFragment() {
 			.create()
 	}
 	
-	@OptIn(DelicateCoroutinesApi::class)
 	override fun onResume() {
 		super.onResume()
 		val dialog = dialog as AlertDialog?
@@ -66,19 +65,18 @@ class LoginDialogFragment : DialogFragment() {
 				if (ipAddress.isNotEmpty() && port.isNotEmpty() && name.isNotEmpty()) {
 					coClient.name = editName.text.toString()
 					
-					GlobalScope.launch {
+					lifecycleScope.launch(Dispatchers.IO) {
 						val ip = InetSocketAddress(ipAddress, port.toInt())
 						
-						if (coClient.tryConnect(ip)) {
-							Log.i(coTag, "Connected to $ip")
-							
-							activity?.runOnUiThread {
-								coFragment.binding.viewSwitcher.showNext()
-							}
-							
-							dialog.dismiss()
+						if (!coClient.isConnecting) {
+							if (coClient.tryConnect(ip)) {
+								Log.i(coTag, "Connected to $ip")
+								
+								dialog.dismiss()
+							} else
+								snackbar(R.string.login_error_connect)
 						} else
-							snackbar(R.string.login_error_connect)
+							snackbar(R.string.login_error_connecting)
 					}
 				} else {
 					snackbar(R.string.login_error_fields)

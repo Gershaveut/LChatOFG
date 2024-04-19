@@ -27,4 +27,5 @@
     <string name="text_input_title">Enter text</string>
     <string name="co_reason">Reason</string>
     <string name="co_reconnect">Reconnect</string>
+    <string name="login_error_connecting">Connection is already in progress</string>
 </resources>
