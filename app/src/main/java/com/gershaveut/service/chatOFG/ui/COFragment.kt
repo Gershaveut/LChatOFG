@@ -55,15 +55,14 @@ class COFragment : Fragment(), COClient.Listener {
 		binding.coContent.recyclerUsers.adapter = userAdapter
 		
 		buttonSend.setOnClickListener {
-			chatScrollView.fullScroll(View.FOCUS_DOWN)
-			
 			GlobalScope.launch {
 				val message = Message(editMessage.text.toString())
 				
 				if (message.text.isNotEmpty()) {
-					if (coClient.trySendMessage(message))
+					if (coClient.trySendMessage(message)) {
 						Log.d(coTag, "send_message: $message")
-					else
+						chatScrollView.fullScroll(View.FOCUS_DOWN)
+					} else
 						snackbar(requireActivity().getString(R.string.co_error_send))
 				}
 				

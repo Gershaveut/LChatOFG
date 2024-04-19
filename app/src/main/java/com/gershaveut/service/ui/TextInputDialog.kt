@@ -8,7 +8,7 @@ import android.widget.EditText
 import com.gershaveut.service.R
 
 @SuppressLint("InflateParams")
-class TextInputDialogFragment : AlertDialog, DialogInterface.OnClickListener {
+class TextInputDialog : AlertDialog, DialogInterface.OnClickListener {
 	private var onConfirmListener: OnConfirmListener?
 	
 	private var editTextInput: EditText

@@ -11,8 +11,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.gershaveut.service.R
-import com.gershaveut.service.chatOFG.COClient
-import com.gershaveut.service.ui.TextInputDialogFragment
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

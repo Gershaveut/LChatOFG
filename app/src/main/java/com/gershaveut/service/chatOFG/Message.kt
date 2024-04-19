@@ -22,7 +22,7 @@ class Message(var text: String, var messageType: MessageType = MessageType.Messa
 	}
 	
 	companion object {
-		fun createMessageFromText(text: String) : Message {
+		fun createMessageFromText(text: String): Message {
 			return try {
 				Message(text.substring(text.indexOf(':') + 1), MessageType.valueOf(text.split(':')[0]))
 			} catch (_: Exception) {

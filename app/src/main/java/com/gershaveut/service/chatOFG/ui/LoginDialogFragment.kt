@@ -1,19 +1,13 @@
 package com.gershaveut.service.chatOFG.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
-import android.os.Debug
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.coTag
@@ -21,8 +15,6 @@ import com.gershaveut.service.debug
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 

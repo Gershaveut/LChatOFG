@@ -5,7 +5,7 @@ import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val event: Listener) : Serializable {
+class COClient(private val event: Listener) {
 	var name: String? = null
 	
 	var socket: Socket = Socket()
@@ -39,7 +39,7 @@ class COClient(private val event: Listener) : Serializable {
 		}
 	}
 	
-	suspend fun tryConnect(endpoint: SocketAddress) : Boolean {
+	suspend fun tryConnect(endpoint: SocketAddress): Boolean {
 		try {
 			connect(endpoint)
 		} catch (_: Exception) {
@@ -61,7 +61,7 @@ class COClient(private val event: Listener) : Serializable {
 		connected = false
 	}
 	
-	suspend fun trySilentDisconnect() : Boolean {
+	suspend fun trySilentDisconnect(): Boolean {
 		try {
 			silentDisconnect()
 		} catch (_: Exception) {
@@ -82,7 +82,7 @@ class COClient(private val event: Listener) : Serializable {
 		disconnect(null)
 	}
 	
-	suspend fun tryDisconnect(reason: String?) : Boolean {
+	suspend fun tryDisconnect(reason: String?): Boolean {
 		try {
 			disconnect(reason)
 		} catch (_: Exception) {
@@ -92,7 +92,7 @@ class COClient(private val event: Listener) : Serializable {
 		return true
 	}
 	
-	suspend fun tryDisconnect() : Boolean {
+	suspend fun tryDisconnect(): Boolean {
 		return tryDisconnect(null)
 	}
 	
@@ -107,13 +107,13 @@ class COClient(private val event: Listener) : Serializable {
 	}
 	
 	fun trySendMessage(text: Message): Boolean {
-			try {
-				sendMessage(text)
-			} catch (_: Exception) {
-				return false
-			}
-			
-			return true
+		try {
+			sendMessage(text)
+		} catch (_: Exception) {
+			return false
+		}
+		
+		return true
 	}
 	
 	@Throws(NullPointerException::class)
