@@ -82,7 +82,7 @@ class LoginDialogFragment : DialogFragment() {
 					snackbar(R.string.login_error_fields)
 					
 					if (debug) {
-						editIpAddress.append("192.168.1.120")
+						editIpAddress.append("10.0.0.192")
 						editPort.append("7500")
 						editName.append("User")
 					}

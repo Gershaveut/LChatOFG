@@ -16,7 +16,6 @@ import com.gershaveut.service.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 class UserAdapter(private val context: Context, var users: ArrayList<String>) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 	override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
 		val view: View = LayoutInflater.from(viewGroup.context).inflate(R.layout.co_user, viewGroup, false)

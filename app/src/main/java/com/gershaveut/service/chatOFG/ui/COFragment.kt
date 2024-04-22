@@ -2,29 +2,35 @@ package com.gershaveut.service.chatOFG.ui
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.gershaveut.coapikt.Message
+import com.gershaveut.coapikt.MessageType
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
-import com.gershaveut.service.chatOFG.Message
-import com.gershaveut.service.chatOFG.MessageType
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
+import com.gershaveut.service.service.COService
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.net.InetSocketAddress
 import java.net.SocketAddress
 
-class COFragment : Fragment(), COClient.Listener {
+class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private var _binding: FragmentCoBinding? = null
 	private val binding get() = _binding!!
 	
+	private lateinit var coService: COService
 	lateinit var coClient: COClient
 	
 	private fun snackbar(text: String) {
@@ -44,13 +50,7 @@ class COFragment : Fragment(), COClient.Listener {
 		val buttonSend = coChat.buttonSend
 		val chatScrollView = coChat.chatScrollView
 		
-		val loginDialog = LoginDialogFragment()
-		
-		val userAdapter = UserAdapter(requireActivity(), ArrayList())
-		
-		coClient = COClient(this)
-		
-		binding.coContent.recyclerUsers.adapter = userAdapter
+		binding.coContent.recyclerUsers.adapter = UserAdapter(requireActivity(), ArrayList())
 		
 		buttonSend.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
@@ -79,7 +79,7 @@ class COFragment : Fragment(), COClient.Listener {
 		binding.coMenu.buttonConnect.setOnClickListener {
 			binding.coContent.coContent.closeDrawers()
 			
-			loginDialog.show(parentFragmentManager, null)
+			LoginDialogFragment().show(parentFragmentManager, null)
 		}
 		
 		return root
@@ -90,32 +90,19 @@ class COFragment : Fragment(), COClient.Listener {
 		
 		if (savedInstanceState != null) {
 			binding.coContent.coChat.viewChat.text = savedInstanceState.getCharSequence("viewChat")
-			
-			val coClientData = savedInstanceState.getStringArrayList("coClientData")
-			
-			if (coClientData != null) {
-				coClient.name = coClientData[2]
-				
-				lifecycleScope.launch(Dispatchers.IO) {
-					coClient.tryConnect(InetSocketAddress(coClientData[0], coClientData[1].toInt()))
-				}
-			}
+		}
+	}
+	
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		
+		Intent(requireActivity(), COService::class.java).also {
+			requireActivity().bindService(it, this, Context.BIND_AUTO_CREATE)
 		}
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putCharSequence("viewChat", binding.coContent.coChat.viewChat.text)
-		
-		outState.remove("coClientData")
-		
-		if (coClient.isConnected)
-			outState.putStringArrayList("coClientData",
-				arrayListOf(
-					coClient.socket.inetAddress.toString().trim('/'),
-					coClient.socket.port.toString(),
-					coClient.name
-				)
-			)
 		
 		super.onSaveInstanceState(outState)
 	}
@@ -124,15 +111,6 @@ class COFragment : Fragment(), COClient.Listener {
 		super.onDestroyView()
 		
 		_binding = null
-	}
-	
-	override fun onDestroy() {
-		super.onDestroy()
-		
-		lifecycleScope.launch(Dispatchers.IO) {
-			if (coClient.isConnected)
-				coClient.silentDisconnect()
-		}
 	}
 	
 	override fun onMessage(message: Message) {
@@ -213,5 +191,17 @@ class COFragment : Fragment(), COClient.Listener {
 					}
 					.create().show()
 		}
+	}
+	
+	override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+		coService = (service as COService.LocalBinder).getService()
+		coClient = coService.coClient
+		coClient.listener = this
+		
+		if (coClient.isConnected)
+			binding.viewSwitcher.showNext()
+	}
+	
+	override fun onServiceDisconnected(name: ComponentName?) {
 	}
 }

@@ -1,12 +1,14 @@
 package com.gershaveut.service.chatOFG
 
+import com.gershaveut.coapikt.Message
+import com.gershaveut.coapikt.MessageType
 import com.gershaveut.service.detailedException
 import kotlinx.coroutines.*
 import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
 
-class COClient(private val listener: Listener?) {
+class COClient(var listener: Listener?) {
 	var name: String? = null
 	var socket: Socket = Socket()
 	@OptIn(DelicateCoroutinesApi::class)
