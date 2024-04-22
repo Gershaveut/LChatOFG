@@ -10,9 +10,9 @@ import java.net.SocketAddress
 
 class COClient(var listener: Listener?) {
 	var name: String? = null
-	var socket: Socket = Socket()
-	@OptIn(DelicateCoroutinesApi::class)
-	private val receiveMessageHandler = newFixedThreadPoolContext(1, "ReceiveMessageHandler")
+	private var socket: Socket = Socket()
+	
+	private lateinit var lastConnect: SocketAddress
 	
 	private var reader: BufferedReader? = null
 	private var writer: PrintWriter? = null
@@ -24,8 +24,7 @@ class COClient(var listener: Listener?) {
 	
 	@Throws(IOException::class)
 	suspend fun connect(endpoint: SocketAddress) = coroutineScope {
-		if (socket.isClosed)
-			socket = Socket()
+		socket = Socket()
 		
 		connecting = true
 		
@@ -37,6 +36,7 @@ class COClient(var listener: Listener?) {
 		
 		listener?.onConnected(endpoint)
 		connected = true
+		lastConnect = socket.remoteSocketAddress
 		
 		Thread { receiveMessageHandler() }.apply {
 			name = "ReceiveMessageHandler"
@@ -109,7 +109,19 @@ class COClient(var listener: Listener?) {
 	
 	@Throws(IOException::class)
 	suspend fun reconnect() {
-		connect(socket.remoteSocketAddress)
+		connect(lastConnect)
+	}
+	
+	suspend fun tryReconnect() : Boolean {
+		try {
+			reconnect()
+		} catch (e: Exception) {
+			listener?.onException(detailedException(e))
+			
+			return false
+		}
+		
+		return true
 	}
 	
 	@Throws(NullPointerException::class)

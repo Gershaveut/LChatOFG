@@ -2,6 +2,7 @@ package com.gershaveut.service.chatOFG.ui
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -180,16 +181,22 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			userAdapter.users.clear()
 			userAdapter.notifyDataSetChanged()
 			
-			if (reason != null)
-				AlertDialog.Builder(activity)
+			if (reason != null) {
+				val reconnectDialog = AlertDialog.Builder(activity)
+				
+				reconnectDialog
 					.setTitle(R.string.co_disconnected)
 					.setMessage(reason)
 					.setPositiveButton(R.string.co_reconnect) { _, _ ->
 						lifecycleScope.launch(Dispatchers.IO) {
-							coClient.reconnect()
+							if (!coClient.tryReconnect())
+								requireActivity().runOnUiThread {
+									reconnectDialog.show()
+								}
 						}
 					}
 					.create().show()
+			}
 		}
 	}
 	
