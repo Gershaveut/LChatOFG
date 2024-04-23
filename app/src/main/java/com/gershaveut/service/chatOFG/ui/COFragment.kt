@@ -19,6 +19,7 @@ import com.gershaveut.coapikt.Message
 import com.gershaveut.coapikt.MessageType
 import com.gershaveut.service.R
 import com.gershaveut.service.chatOFG.COClient
+import com.gershaveut.service.chatOFG.Connection
 import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
 import com.gershaveut.service.service.COService
@@ -42,8 +43,10 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	
 	private val viewSwitcher get() = binding.viewSwitcher
 	private val recyclerUsers get() = coContent.recyclerUsers
+	private val recyclerConnections get() = coMenu.recyclerConnections
 	
 	private val userAdapter: UserAdapter get() = recyclerUsers.adapter as UserAdapter
+	private val connectionAdapter: ConnectionAdapter get() = recyclerConnections.adapter as ConnectionAdapter
 	
 	private val editMessage get() = coChat.editMessage
 	private val viewChat get() = coChat.viewChat
@@ -99,17 +102,23 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			LoginDialogFragment().show(parentFragmentManager, null)
 		}
 		
+		return root
+	}
+	
+	override fun onCreate(savedInstanceState: Bundle?) {
 		if (savedInstanceState != null) {
 			viewChat.text = savedInstanceState.getCharSequence("viewChat")
 			userAdapter.users = savedInstanceState.getStringArrayList("recyclerUsers")!!
+			connectionAdapter.connections = savedInstanceState.getSerializable("recyclerConnections") as ArrayList<Connection>
 		}
 		
-		return root
+		super.onCreate(savedInstanceState)
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putCharSequence("viewChat", viewChat.text)
 		outState.putStringArrayList("recyclerUsers", userAdapter.users)
+		outState.putSerializable("recyclerConnections", connectionAdapter.connections)
 		
 		super.onSaveInstanceState(outState)
 	}
@@ -164,6 +173,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		requireActivity().runOnUiThread {
 			viewSwitcher.showNext()
 		}
+		
+		connectionAdapter.connections.add(Connection(coClient.lastConnect, coClient.name!!))
+		userAdapter.notifyItemInserted(connectionAdapter.connections.size - 1)
 	}
 	
 	@SuppressLint("NotifyDataSetChanged")
@@ -204,6 +216,8 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		coClient = coService.coClient
 		coClient.listener = this
+		
+		recyclerConnections.adapter = ConnectionAdapter(requireActivity(), ArrayList(), coClient)
 		
 		if (coClient.isConnected)
 			viewSwitcher.showNext()

@@ -7,12 +7,12 @@ import kotlinx.coroutines.*
 import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
-
+//TODO: Remove extra exceptions
 class COClient(var listener: Listener?) {
 	var name: String? = null
 	private var socket: Socket = Socket()
 	
-	private lateinit var lastConnect: SocketAddress
+	lateinit var lastConnect: SocketAddress
 	
 	private var reader: BufferedReader? = null
 	private var writer: PrintWriter? = null
@@ -34,9 +34,9 @@ class COClient(var listener: Listener?) {
 			connecting = false
 		}
 		
-		listener?.onConnected(endpoint)
-		connected = true
 		lastConnect = socket.remoteSocketAddress
+		connected = true
+		listener?.onConnected(endpoint)
 		
 		Thread { receiveMessageHandler() }.apply {
 			name = "ReceiveMessageHandler"
