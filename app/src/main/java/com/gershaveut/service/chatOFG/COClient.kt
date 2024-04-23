@@ -143,7 +143,7 @@ class COClient(var listener: Listener?) {
 	
 	@Throws(NullPointerException::class)
 	fun kick(user: String, reason: String) {
-		sendMessage(Message("$reason:$user", MessageType.Kick))
+		sendMessage(Message("$user:$reason", MessageType.Kick))
 	}
 	
 	private fun receiveMessageHandler() {

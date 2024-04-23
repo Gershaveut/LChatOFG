@@ -19,8 +19,6 @@ import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
 
 class LoginDialogFragment : DialogFragment() {
-	private lateinit var coClient: COClient
-	
 	@SuppressLint("InflateParams")
 	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 		super.onCreate(savedInstanceState)
@@ -51,8 +49,6 @@ class LoginDialogFragment : DialogFragment() {
 			
 			val coFragment = parentFragmentManager.primaryNavigationFragment as COFragment
 			
-			coClient = coFragment.coClient
-			
 			positiveButton.setOnClickListener {
 				fun snackbar(resId: Int) {
 					Snackbar.make(view, resId, 1000).show()
@@ -63,13 +59,13 @@ class LoginDialogFragment : DialogFragment() {
 				val name = editName.text.toString()
 				
 				if (ipAddress.isNotEmpty() && port.isNotEmpty() && name.isNotEmpty()) {
-					coClient.name = editName.text.toString()
+					coFragment.coClient.name = editName.text.toString()
 					
 					lifecycleScope.launch(Dispatchers.IO) {
 						val ip = InetSocketAddress(ipAddress, port.toInt())
 						
-						if (!coClient.isConnecting) {
-							if (coClient.tryConnect(ip)) {
+						if (!coFragment.coClient.isConnecting) {
+							if (coFragment.coClient.tryConnect(ip)) {
 								Log.i(coTag, "Connected to $ip")
 								
 								dialog.dismiss()

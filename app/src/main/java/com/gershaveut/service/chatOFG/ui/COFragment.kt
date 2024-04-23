@@ -31,11 +31,35 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private var _binding: FragmentCoBinding? = null
 	private val binding get() = _binding!!
 	
-	private lateinit var coService: COService
 	lateinit var coClient: COClient
+	
+	
+	private val root: View get() = binding.root
+	
+	private val coMenu get() = binding.coMenu
+	private val coContent get() = binding.coContent
+	private val coChat get() = coContent.coChat
+	
+	private val viewSwitcher get() = binding.viewSwitcher
+	private val recyclerUsers get() = coContent.recyclerUsers
+	
+	private val userAdapter: UserAdapter get() = recyclerUsers.adapter as UserAdapter
+	
+	private val editMessage get() = coChat.editMessage
+	private val viewChat get() = coChat.viewChat
+	private val buttonSend get() = coChat.buttonSend
+	private val chatScrollView get() = coChat.chatScrollView
 	
 	private fun snackbar(text: String) {
 		Snackbar.make(binding.root, text, 1000).show()
+	}
+	
+	override fun onAttach(context: Context) {
+		super.onAttach(context)
+		
+		Intent(requireActivity(), COService::class.java).also {
+			requireActivity().bindService(it, this, Context.BIND_AUTO_CREATE)
+		}
 	}
 	
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -43,15 +67,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		_binding = FragmentCoBinding.inflate(inflater, container, false)
 		
-		val root: View = binding.root
-		
-		val coChat = binding.coContent.coChat
-		
-		val editMessage = coChat.editMessage
-		val buttonSend = coChat.buttonSend
-		val chatScrollView = coChat.chatScrollView
-		
-		binding.coContent.recyclerUsers.adapter = UserAdapter(requireActivity(), ArrayList())
+		recyclerUsers.adapter = UserAdapter(requireActivity(), ArrayList())
 		
 		buttonSend.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
@@ -71,39 +87,29 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			}
 		}
 		
-		binding.coContent.buttonDisconnect.setOnClickListener {
+		coContent.buttonDisconnect.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
 				coClient.disconnect()
 			}
 		}
 		
-		binding.coMenu.buttonConnect.setOnClickListener {
-			binding.coContent.coContent.closeDrawers()
+		coMenu.buttonConnect.setOnClickListener {
+			coContent.coContent.closeDrawers()
 			
 			LoginDialogFragment().show(parentFragmentManager, null)
+		}
+		
+		if (savedInstanceState != null) {
+			viewChat.text = savedInstanceState.getCharSequence("viewChat")
+			userAdapter.users = savedInstanceState.getStringArrayList("recyclerUsers")!!
 		}
 		
 		return root
 	}
 	
-	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-		super.onViewCreated(view, savedInstanceState)
-		
-		if (savedInstanceState != null) {
-			binding.coContent.coChat.viewChat.text = savedInstanceState.getCharSequence("viewChat")
-		}
-	}
-	
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		
-		Intent(requireActivity(), COService::class.java).also {
-			requireActivity().bindService(it, this, Context.BIND_AUTO_CREATE)
-		}
-	}
-	
 	override fun onSaveInstanceState(outState: Bundle) {
-		outState.putCharSequence("viewChat", binding.coContent.coChat.viewChat.text)
+		outState.putCharSequence("viewChat", viewChat.text)
+		outState.putStringArrayList("recyclerUsers", userAdapter.users)
 		
 		super.onSaveInstanceState(outState)
 	}
@@ -115,9 +121,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	}
 	
 	override fun onMessage(message: Message) {
-		val userAdapter = binding.coContent.recyclerUsers.adapter as UserAdapter
-		val coChat = binding.coContent.coChat
-		
 		Log.d(coTag, "receive_message: $message")
 		
 		val userName = message.text.split(' ')[0]
@@ -144,12 +147,12 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 				}
 				
 				else -> {
-					coChat.viewChat.append(if (coChat.viewChat.text.isEmpty()) message.text else "\n" + message.text)
-					coChat.chatScrollView.fullScroll(View.FOCUS_DOWN)
+					viewChat.append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text)
+					chatScrollView.fullScroll(View.FOCUS_DOWN)
 				}
 			}
 			
-			binding.coContent.recyclerUsers.refreshDrawableState()
+			recyclerUsers.refreshDrawableState()
 		}
 	}
 	
@@ -159,7 +162,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	
 	override fun onConnected(endpoint: SocketAddress) {
 		requireActivity().runOnUiThread {
-			binding.viewSwitcher.showNext()
+			viewSwitcher.showNext()
 		}
 	}
 	
@@ -168,15 +171,11 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		Log.i(coTag, "Disconnected")
 		
 		activity?.runOnUiThread {
-			binding.viewSwitcher.showPrevious()
+			viewSwitcher.showPrevious()
 			
-			val coChat = binding.coContent.coChat
-			
-			coChat.viewChat.text = null
-			coChat.editMessage.text = null
-			binding.coContent.coContent.closeDrawers()
-			
-			val userAdapter = binding.coContent.recyclerUsers.adapter as UserAdapter
+			viewChat.text = null
+			editMessage.text = null
+			coContent.coContent.closeDrawers()
 			
 			userAdapter.users.clear()
 			userAdapter.notifyDataSetChanged()
@@ -201,12 +200,13 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	}
 	
 	override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-		coService = (service as COService.LocalBinder).getService()
+		val coService = (service as COService.LocalBinder).getService()
+		
 		coClient = coService.coClient
 		coClient.listener = this
 		
 		if (coClient.isConnected)
-			binding.viewSwitcher.showNext()
+			viewSwitcher.showNext()
 	}
 	
 	override fun onServiceDisconnected(name: ComponentName?) {
