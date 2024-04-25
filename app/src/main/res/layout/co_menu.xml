@@ -13,26 +13,55 @@
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@+id/buttonConnect"/>
+
 	<Button
-			android:text="@string/co_connect"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/buttonConnect"
-			app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent"/>
+		android:id="@+id/buttonConnect"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/co_connect"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintVertical_bias="0.15" />
+
+	<TextView
+		android:id="@+id/textHistory"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/co_history"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/buttonConnect"
+		app:layout_constraintVertical_bias="0.100000024" />
+
 	<LinearLayout
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:layout_marginStart="24dp"
-		android:layout_marginTop="24dp" android:layout_marginEnd="24dp"
+		android:layout_marginTop="24dp"
+		android:layout_marginEnd="24dp"
 		android:layout_marginBottom="24dp"
-		android:orientation="vertical" app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/buttonConnect">
+		android:orientation="vertical"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/textHistory">
+
 		<androidx.recyclerview.widget.RecyclerView
 			android:id="@+id/recyclerConnections"
-			app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"/>
+			android:layout_height="match_parent"
+			app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 	</LinearLayout>
+
+	<View
+		android:id="@+id/divider"
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:background="?android:attr/listDivider"
+		app:layout_constraintBottom_toTopOf="@+id/textHistory"
+		app:layout_constraintTop_toBottomOf="@+id/buttonConnect"
+		tools:layout_editor_absoluteX="1dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

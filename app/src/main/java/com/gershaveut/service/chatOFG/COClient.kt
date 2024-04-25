@@ -62,8 +62,8 @@ class COClient(var listener: Listener?) {
 	
 	fun silentDisconnect() {
 		socket.close()
-		reader!!.close()
-		writer!!.close()
+		reader?.close()
+		writer?.close()
 		
 		connected = false
 	}
@@ -165,6 +165,8 @@ class COClient(var listener: Listener?) {
 				
 				listener?.onMessage(message)
 			}
+		} catch (_: IOException) {
+		
 		} catch (e: Exception) {
 			listener?.onException(detailedException(e))
 		}

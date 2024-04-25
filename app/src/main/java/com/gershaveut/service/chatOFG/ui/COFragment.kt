@@ -8,7 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.Debug
 import android.os.IBinder
+import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +28,7 @@ import com.gershaveut.service.service.COService
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.InetSocketAddress
 import java.net.SocketAddress
 
 class COFragment : Fragment(), COClient.Listener, ServiceConnection {
@@ -71,6 +74,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		_binding = FragmentCoBinding.inflate(inflater, container, false)
 		
 		recyclerUsers.adapter = UserAdapter(requireActivity(), ArrayList())
+		recyclerConnections.adapter = ConnectionAdapter(requireActivity(), ArrayList(), this)
 		
 		buttonSend.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
@@ -102,23 +106,24 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			LoginDialogFragment().show(parentFragmentManager, null)
 		}
 		
-		return root
-	}
-	
-	override fun onCreate(savedInstanceState: Bundle?) {
 		if (savedInstanceState != null) {
 			viewChat.text = savedInstanceState.getCharSequence("viewChat")
 			userAdapter.users = savedInstanceState.getStringArrayList("recyclerUsers")!!
-			connectionAdapter.connections = savedInstanceState.getSerializable("recyclerConnections") as ArrayList<Connection>
+			connectionAdapter.connections = savedInstanceState.getParcelableArrayList("recyclerConnections")!!
 		}
 		
-		super.onCreate(savedInstanceState)
+		if (Debug.isDebuggerConnected()) {
+			connectionAdapter.registerConnection(Connection("192.168.1.82", 7500, "User"))
+			userAdapter.notifyItemInserted(connectionAdapter.connections.size - 1)
+		}
+		
+		return root
 	}
 	
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putCharSequence("viewChat", viewChat.text)
 		outState.putStringArrayList("recyclerUsers", userAdapter.users)
-		outState.putSerializable("recyclerConnections", connectionAdapter.connections)
+		outState.putParcelableArrayList("recyclerConnections", connectionAdapter.connections)
 		
 		super.onSaveInstanceState(outState)
 	}
@@ -150,8 +155,8 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					if (!users.equals(userName)) {
 						val index = users.indexOf(userName)
 						
-						users.removeAt(index)
 						userAdapter.notifyItemRemoved(index)
+						users.removeAt(index)
 					}
 				}
 				
@@ -170,12 +175,16 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	}
 	
 	override fun onConnected(endpoint: SocketAddress) {
+		Log.i(coTag, "Connected to $endpoint")
+		
 		requireActivity().runOnUiThread {
 			viewSwitcher.showNext()
+			
+			val splitSocketAddress = coClient.lastConnect.toString().split(':')
+			
+			connectionAdapter.registerConnection(Connection(splitSocketAddress[0].replace("/", ""), splitSocketAddress[1].toInt(), coClient.name!!))
+			userAdapter.notifyItemInserted(connectionAdapter.connections.size - 1)
 		}
-		
-		connectionAdapter.connections.add(Connection(coClient.lastConnect, coClient.name!!))
-		userAdapter.notifyItemInserted(connectionAdapter.connections.size - 1)
 	}
 	
 	@SuppressLint("NotifyDataSetChanged")
@@ -216,8 +225,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		coClient = coService.coClient
 		coClient.listener = this
-		
-		recyclerConnections.adapter = ConnectionAdapter(requireActivity(), ArrayList(), coClient)
 		
 		if (coClient.isConnected)
 			viewSwitcher.showNext()

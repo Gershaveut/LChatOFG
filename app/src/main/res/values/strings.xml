@@ -8,7 +8,7 @@
     <string name="action_settings">Settings</string>
 
     <string name="menu_chat_ofg" translatable="false">ChatOFG</string>
-	<string name="login_ip_address">IP Address</string>
+	<string name="login_hostname">IP Address (hostname)</string>
     <string name="login_port">Port</string>
     <string name="login_name">Name</string>
     <string name="login_login">Login</string>
@@ -29,4 +29,5 @@
     <string name="co_reconnect">Reconnect</string>
     <string name="login_error_connecting">Connection is already in progress</string>
     <string name="co_remove">Remove</string>
+    <string name="co_history">Connection history</string>
 </resources>

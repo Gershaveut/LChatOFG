@@ -9,8 +9,8 @@ android {
 
     defaultConfig {
         applicationId = "com.gershaveut.service"
-        minSdk = 28
-        targetSdk = 34
+		minSdk = 26
+		targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 

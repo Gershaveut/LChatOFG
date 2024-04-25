@@ -18,12 +18,12 @@
 		app:layout_constraintTop_toTopOf="parent">
 
 		<EditText
-			android:id="@+id/editIpAddress"
+			android:id="@+id/editHostname"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:autofillHints="ip"
+			android:autofillHints="hostname"
 			android:ems="10"
-			android:hint="@string/login_ip_address"
+			android:hint="@string/login_hostname"
 			android:inputType="text"
 			android:minHeight="48dp" />
 
