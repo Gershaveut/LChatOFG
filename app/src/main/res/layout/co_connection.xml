@@ -15,8 +15,9 @@
         tools:ignore="HardcodedText"/>
     <ImageButton
         android:id="@+id/buttonConnectionActions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:background="@android:color/transparent"
+        app:tint="?android:attr/textColorPrimary"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content" android:backgroundTint="?android:attr/colorBackground"
         android:contentDescription="more"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"

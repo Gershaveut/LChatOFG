@@ -13,12 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.gershaveut.service.MainActivity
 import com.gershaveut.service.R
-import com.gershaveut.service.chatOFG.COClient
 import com.gershaveut.service.chatOFG.Connection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.InetSocketAddress
-import java.util.Collections
 
 class ConnectionAdapter(private val context: Context, var connections: ArrayList<Connection>, private val coFragment: COFragment) : RecyclerView.Adapter<ConnectionAdapter.ViewHolder>() {
 	
@@ -28,8 +26,10 @@ class ConnectionAdapter(private val context: Context, var connections: ArrayList
 	}
 	
 	fun registerConnection(connection: Connection) {
-		if (!connections.contains(connection))
+		if (!connections.contains(connection)) {
 			connections.add(connection)
+			notifyItemInserted(connections.size - 1)
+		}
 	}
 	
 	@SuppressLint("SetTextI18n")
@@ -51,7 +51,9 @@ class ConnectionAdapter(private val context: Context, var connections: ArrayList
 				when (it.itemId) {
 					MenuID.Connect.ordinal -> (context as MainActivity).lifecycleScope.launch(Dispatchers.IO) {
 						coClient.name = connection.userName
-						coClient.tryConnect(InetSocketAddress(connection.hostname, connection.port))
+						
+						if (!coFragment.tryConnect(InetSocketAddress(connection.hostname, connection.port)))
+							coFragment.snackbar(R.string.login_error_connect)
 					}
 					MenuID.Remove.ordinal -> {
 						val index = connections.indexOf(connection)

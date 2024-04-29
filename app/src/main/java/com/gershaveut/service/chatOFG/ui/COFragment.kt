@@ -2,7 +2,6 @@ package com.gershaveut.service.chatOFG.ui
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -10,7 +9,6 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
-import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -28,7 +26,6 @@ import com.gershaveut.service.service.COService
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.net.InetSocketAddress
 import java.net.SocketAddress
 
 class COFragment : Fragment(), COClient.Listener, ServiceConnection {
@@ -44,6 +41,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private val coContent get() = binding.coContent
 	private val coChat get() = coContent.coChat
 	
+	private val connectingBar get() = coMenu.connectingBar
 	private val viewSwitcher get() = binding.viewSwitcher
 	private val recyclerUsers get() = coContent.recyclerUsers
 	private val recyclerConnections get() = coMenu.recyclerConnections
@@ -56,8 +54,12 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private val buttonSend get() = coChat.buttonSend
 	private val chatScrollView get() = coChat.chatScrollView
 	
-	private fun snackbar(text: String) {
+	fun snackbar(text: String) {
 		Snackbar.make(binding.root, text, 1000).show()
+	}
+	
+	fun snackbar(resId: Int) {
+		Snackbar.make(binding.root, resId, 1000).show()
 	}
 	
 	override fun onAttach(context: Context) {
@@ -94,16 +96,22 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			}
 		}
 		
+		coMenu.buttonConnect.setOnClickListener {
+			coContent.coContent.closeDrawers()
+			
+			LoginDialogFragment().show(parentFragmentManager, null)
+		}
+		
 		coContent.buttonDisconnect.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
 				coClient.disconnect()
 			}
 		}
 		
-		coMenu.buttonConnect.setOnClickListener {
-			coContent.coContent.closeDrawers()
-			
-			LoginDialogFragment().show(parentFragmentManager, null)
+		coContent.buttonBroadcast.setOnClickListener {
+			lifecycleScope.launch(Dispatchers.IO) {
+				BroadcastDialogFragment().show(parentFragmentManager, null)
+			}
 		}
 		
 		if (savedInstanceState != null) {
@@ -114,7 +122,8 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		if (Debug.isDebuggerConnected()) {
 			connectionAdapter.registerConnection(Connection("192.168.1.82", 7500, "User"))
-			userAdapter.notifyItemInserted(connectionAdapter.connections.size - 1)
+			connectionAdapter.registerConnection(Connection("192.168.1.120", 7500, "User"))
+			connectionAdapter.registerConnection(Connection("10.0.0.193", 7500, "User"))
 		}
 		
 		return root
@@ -134,6 +143,20 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		_binding = null
 	}
 	
+	suspend fun tryConnect(endpoint: SocketAddress) : Boolean {
+		requireActivity().runOnUiThread {
+			connectingBar.visibility = View.VISIBLE
+		}
+		
+		val result = coClient.tryConnect(endpoint)
+		
+		requireActivity().runOnUiThread {
+			connectingBar.visibility = View.INVISIBLE
+		}
+		
+		return result
+	}
+	
 	override fun onMessage(message: Message) {
 		Log.d(coTag, "receive_message: $message")
 		
@@ -150,7 +173,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 						userAdapter.notifyItemInserted(users.size - 1)
 					}
 				}
-				
 				MessageType.Leave -> {
 					if (!users.equals(userName)) {
 						val index = users.indexOf(userName)
@@ -159,7 +181,12 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 						users.removeAt(index)
 					}
 				}
-				
+				MessageType.Broadcast -> {
+					AlertDialog.Builder(activity)
+						.setTitle(R.string.co_broadcast)
+						.setMessage(message.text)
+						.create().show()
+				}
 				else -> {
 					viewChat.append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text)
 					chatScrollView.fullScroll(View.FOCUS_DOWN)
@@ -183,7 +210,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			val splitSocketAddress = coClient.lastConnect.toString().split(':')
 			
 			connectionAdapter.registerConnection(Connection(splitSocketAddress[0].replace("/", ""), splitSocketAddress[1].toInt(), coClient.name!!))
-			userAdapter.notifyItemInserted(connectionAdapter.connections.size - 1)
 		}
 	}
 	

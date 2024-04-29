@@ -39,6 +39,6 @@ class TextInputDialog : AlertDialog, DialogInterface.OnClickListener {
 	}
 	
 	interface OnConfirmListener {
-		fun onConfirm(reason: String)
+		fun onConfirm(text: String)
 	}
 }

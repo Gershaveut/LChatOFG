@@ -24,4 +24,7 @@
     <string name="login_error_connecting">Подключение уже выполняется</string>
     <string name="co_remove">Удалить</string>
     <string name="co_history">История подключений</string>
+    <string name="co_broadcast">Широковещательное сообщение</string>
+	<string name="co_broadcast_send">Отправить широковещательное сообщение</string>
+	<string name="co_custom_message">Своё сообщение</string>
 </resources>

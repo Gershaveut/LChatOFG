@@ -146,6 +146,11 @@ class COClient(var listener: Listener?) {
 		sendMessage(Message("$user:$reason", MessageType.Kick))
 	}
 	
+	@Throws(NullPointerException::class)
+	fun broadcast(text: String) {
+		sendMessage(Message(text, MessageType.Broadcast))
+	}
+	
 	private fun receiveMessageHandler() {
 		reader = BufferedReader(InputStreamReader(socket.getInputStream()))
 		writer = PrintWriter(socket.getOutputStream(), true)

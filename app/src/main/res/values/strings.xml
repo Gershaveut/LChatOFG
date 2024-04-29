@@ -30,4 +30,7 @@
     <string name="login_error_connecting">Connection is already in progress</string>
     <string name="co_remove">Remove</string>
     <string name="co_history">Connection history</string>
+    <string name="co_broadcast">Broadcast message</string>
+    <string name="co_broadcast_send">Broadcast</string>
+    <string name="co_custom_message">Custom message</string>
 </resources>

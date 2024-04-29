@@ -4,9 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import android.util.Log
 import com.gershaveut.service.chatOFG.COClient
-import com.gershaveut.service.coTag
 
 class COService : Service() {
 	private val binder = LocalBinder()

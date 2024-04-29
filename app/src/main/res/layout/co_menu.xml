@@ -64,4 +64,13 @@
 		app:layout_constraintBottom_toTopOf="@+id/textHistory"
 		app:layout_constraintTop_toBottomOf="@+id/buttonConnect"
 		tools:layout_editor_absoluteX="1dp" />
+	<ProgressBar
+		android:id="@+id/connectingBar"
+		style="?android:attr/progressBarStyleHorizontal"
+		android:indeterminate="true"
+		android:visibility="invisible"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

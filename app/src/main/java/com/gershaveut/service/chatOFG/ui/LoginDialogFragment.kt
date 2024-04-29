@@ -59,7 +59,7 @@ class LoginDialogFragment : DialogFragment() {
 					
 					lifecycleScope.launch(Dispatchers.IO) {
 						if (!coFragment.coClient.isConnecting) {
-							if (coFragment.coClient.tryConnect(InetSocketAddress(hostname, port.toInt()))) {
+							if (coFragment.tryConnect(InetSocketAddress(hostname, port.toInt()))) {
 								dialog.dismiss()
 							} else
 								snackbar(R.string.login_error_connect)

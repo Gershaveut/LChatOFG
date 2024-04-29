@@ -2,16 +2,15 @@ package com.gershaveut.service.chatOFG.ui
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.gershaveut.service.R
-import com.gershaveut.service.ui.TextInputDialog
-import kotlinx.coroutines.DelicateCoroutinesApi
+import com.gershaveut.service.ui.TextInputDialogFragment
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class KickDialogFragment() : DialogFragment(), TextInputDialog.OnConfirmListener {
+class KickDialogFragment() : TextInputDialogFragment() {
+	override val required: String get() = getString(R.string.co_reason)
+	
 	private lateinit var userName: String
 	
 	constructor(userName: String) : this() {
@@ -29,12 +28,12 @@ class KickDialogFragment() : DialogFragment(), TextInputDialog.OnConfirmListener
 			userName = savedInstanceState.getString("userName").toString()
 		}
 		
-		return TextInputDialog(requireActivity(), getString(R.string.co_reason), this)
+		return super.onCreateDialog(savedInstanceState)
 	}
 	
-	override fun onConfirm(reason: String) {
+	override fun onConfirm(text: String) {
 		lifecycleScope.launch(Dispatchers.IO) {
-			(parentFragmentManager.primaryNavigationFragment!!.childFragmentManager.primaryNavigationFragment as COFragment).coClient.kick(userName, reason)
+			(parentFragmentManager.primaryNavigationFragment!!.childFragmentManager.primaryNavigationFragment as COFragment).coClient.kick(userName, text)
 		}
 	}
 }

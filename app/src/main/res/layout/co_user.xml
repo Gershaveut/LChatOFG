@@ -17,8 +17,9 @@
 			app:layout_constraintBottom_toBottomOf="parent"
 			tools:ignore="HardcodedText" app:layout_constraintEnd_toStartOf="@+id/user_actions"/>
 	<ImageButton
-			android:background="@android:color/transparent"
-			android:layout_width="wrap_content"
+			android:backgroundTint="?android:attr/colorBackground"
+			app:tint="?android:attr/textColorPrimary"
+			android:layout_width="30dp"
 			android:layout_height="wrap_content" app:srcCompat="@drawable/ic_more" android:id="@+id/user_actions"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
