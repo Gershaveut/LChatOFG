@@ -36,7 +36,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginStart="8dp"
 			android:layout_marginEnd="8dp"
-			android:text="@string/co_custom_message" android:visibility="gone"/>
+			android:text="@string/co_custom_message"/>
 		<androidx.recyclerview.widget.RecyclerView
 				android:id="@+id/recycler_users"
 				app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

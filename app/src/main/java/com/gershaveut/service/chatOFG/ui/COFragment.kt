@@ -109,9 +109,11 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		}
 		
 		coContent.buttonBroadcast.setOnClickListener {
-			lifecycleScope.launch(Dispatchers.IO) {
-				BroadcastDialogFragment().show(parentFragmentManager, null)
-			}
+			BroadcastDialogFragment().show(parentFragmentManager, null)
+		}
+		
+		coContent.buttonCustomMessage.setOnClickListener {
+			CustomMessageDialogFragment().show(parentFragmentManager, null)
 		}
 		
 		if (savedInstanceState != null) {
@@ -177,8 +179,10 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					if (!users.equals(userName)) {
 						val index = users.indexOf(userName)
 						
-						userAdapter.notifyItemRemoved(index)
-						users.removeAt(index)
+						if (index != -1) {
+							userAdapter.notifyItemRemoved(index)
+							users.removeAt(index)
+						}
 					}
 				}
 				MessageType.Broadcast -> {

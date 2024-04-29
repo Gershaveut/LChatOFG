@@ -10,7 +10,7 @@
 	<string name="co_connect">Подключиться</string>
 	<string name="login_error_fields">Не все поля заполнены</string>
 	<string name="co_message">Сообщение</string>
-	<string name="co_send">Отправить сообщение</string>
+	<string name="co_send">Отправить</string>
 	<string name="login_error_connect">Не удалось подключиться</string>
 	<string name="co_error_send">Не удалось отправить сообщение</string>
 	<string name="co_disconnect">Отключиться</string>
@@ -27,4 +27,5 @@
     <string name="co_broadcast">Широковещательное сообщение</string>
 	<string name="co_broadcast_send">Отправить широковещательное сообщение</string>
 	<string name="co_custom_message">Своё сообщение</string>
+    <string name="text">Текст</string>
 </resources>
