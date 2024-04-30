@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
@@ -24,6 +25,8 @@ import com.gershaveut.service.coTag
 import com.gershaveut.service.databinding.FragmentCoBinding
 import com.gershaveut.service.service.COService
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
@@ -33,6 +36,8 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private val binding get() = _binding!!
 	
 	lateinit var coClient: COClient
+	private lateinit var preferences: SharedPreferences
+	private val connectionsType = object : TypeToken<ArrayList<Connection>>() {}.type
 	
 	
 	private val root: View get() = binding.root
@@ -65,8 +70,10 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	override fun onAttach(context: Context) {
 		super.onAttach(context)
 		
+		preferences = context.getSharedPreferences(coTag, Context.MODE_PRIVATE)
+		
 		Intent(requireActivity(), COService::class.java).also {
-			requireActivity().bindService(it, this, Context.BIND_AUTO_CREATE)
+			context.bindService(it, this, Context.BIND_AUTO_CREATE)
 		}
 	}
 	
@@ -116,10 +123,11 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			CustomMessageDialogFragment().show(parentFragmentManager, null)
 		}
 		
+		connectionAdapter.connections = Gson().fromJson(preferences.getString("connections", ""), connectionsType)
+		
 		if (savedInstanceState != null) {
 			viewChat.text = savedInstanceState.getCharSequence("viewChat")
 			userAdapter.users = savedInstanceState.getStringArrayList("recyclerUsers")!!
-			connectionAdapter.connections = savedInstanceState.getParcelableArrayList("recyclerConnections")!!
 		}
 		
 		if (Debug.isDebuggerConnected()) {
@@ -134,7 +142,12 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putCharSequence("viewChat", viewChat.text)
 		outState.putStringArrayList("recyclerUsers", userAdapter.users)
-		outState.putParcelableArrayList("recyclerConnections", connectionAdapter.connections)
+		
+		Log.i(coTag, Gson().toJson(connectionAdapter.connections, connectionsType))
+		
+		preferences.edit()
+			.putString("connections", Gson().toJson(connectionAdapter.connections, connectionsType))
+			.apply()
 		
 		super.onSaveInstanceState(outState)
 	}
