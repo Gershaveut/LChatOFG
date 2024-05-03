@@ -2,7 +2,7 @@ package com.gershaveut.service.chatOFG
 
 import com.gershaveut.coapikt.Message
 import com.gershaveut.coapikt.MessageType
-import com.gershaveut.service.detailedException
+import com.gershaveut.ock.detailedException
 import kotlinx.coroutines.*
 import java.io.*
 import java.net.Socket

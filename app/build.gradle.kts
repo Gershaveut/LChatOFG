@@ -37,6 +37,7 @@ android {
 
 dependencies {
     implementation(files("libs/ChatOFGAPIKT.jar"))
+    implementation(files("libs/OFGmCoreKT.jar"))
     implementation("com.google.code.gson:gson:2.10.1")
     
     implementation("androidx.core:core-ktx:1.10.1")
