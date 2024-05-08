@@ -155,7 +155,7 @@ class COClient(var listener: Listener?) {
 		reader = BufferedReader(InputStreamReader(socket.getInputStream()))
 		writer = PrintWriter(socket.getOutputStream(), true)
 		
-		writer!!.println(name!!)
+		name?.let { writer!!.println(it) }
 		
 		var reason: String? = "The remote host forcibly terminated the connection."
 		

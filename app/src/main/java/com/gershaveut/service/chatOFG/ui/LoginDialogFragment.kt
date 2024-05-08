@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
@@ -42,8 +43,13 @@ class LoginDialogFragment : DialogFragment() {
 			val editHostname = view.findViewById<EditText>(R.id.editHostname)
 			val editPort = view.findViewById<EditText>(R.id.editPort)
 			val editName = view.findViewById<EditText>(R.id.editName)
+			val checkNoName = view.findViewById<CheckBox>(R.id.check_no_name)
 			
 			val coFragment = parentFragmentManager.primaryNavigationFragment as COFragment
+			
+			checkNoName.setOnCheckedChangeListener { _, isChecked ->
+				editName.isEnabled = !isChecked
+			}
 			
 			positiveButton.setOnClickListener {
 				fun snackbar(resId: Int) {
@@ -54,8 +60,9 @@ class LoginDialogFragment : DialogFragment() {
 				val port = editPort.text.toString()
 				val name = editName.text.toString()
 				
-				if (hostname.isNotEmpty() && port.isNotEmpty() && name.isNotEmpty()) {
-					coFragment.coClient.name = editName.text.toString()
+				if (hostname.isNotEmpty() && port.isNotEmpty() && (name.isNotEmpty() || checkNoName.isChecked)) {
+					if (!checkNoName.isChecked)
+						coFragment.coClient.name = editName.text.toString()
 					
 					lifecycleScope.launch(Dispatchers.IO) {
 						if (!coFragment.coClient.isConnecting) {

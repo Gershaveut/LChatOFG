@@ -36,7 +36,7 @@ class ConnectionAdapter(private val context: Context, var connections: ArrayList
 	override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 		val connection = connections[position]
 		
-		viewHolder.viewName.text = connection.userName
+		viewHolder.viewName.text = connection.userName ?: context.getString(R.string.login_no_name)
 		viewHolder.viewDescription.text = "${connection.hostname}:${connection.port}"
 		
 		viewHolder.buttonActions.setOnClickListener {

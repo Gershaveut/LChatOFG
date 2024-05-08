@@ -34,4 +34,5 @@
     <string name="co_broadcast_send">Broadcast</string>
     <string name="co_custom_message">Custom message</string>
     <string name="text">Text</string>
+    <string name="login_no_name">No name</string>
 </resources>

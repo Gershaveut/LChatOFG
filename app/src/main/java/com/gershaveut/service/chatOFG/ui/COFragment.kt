@@ -232,7 +232,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			val splitSocketAddress = coClient.lastConnect.toString().split(':')
 			val hostname = splitSocketAddress[0]
 			
-			connectionAdapter.registerConnection(Connection(hostname.split("/")[if (hostname.startsWith("/")) 1 else 0], splitSocketAddress[1].toInt(), coClient.name!!))
+			connectionAdapter.registerConnection(Connection(hostname.split("/")[if (hostname.startsWith("/")) 1 else 0], splitSocketAddress[1].toInt(), coClient.name))
 		}
 	}
 	

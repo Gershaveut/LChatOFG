@@ -28,4 +28,5 @@
 	<string name="co_broadcast_send">Отправить широковещательное сообщение</string>
 	<string name="co_custom_message">Своё сообщение</string>
     <string name="text">Текст</string>
+    <string name="login_no_name">Без имени</string>
 </resources>
