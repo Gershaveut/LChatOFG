@@ -125,11 +125,11 @@ class COClient(var listener: Listener?) {
 	}
 	
 	@Throws(NullPointerException::class)
-	fun sendMessage(message: Message) {
-		writer!!.println(message)
+	fun sendMessage(text: String) {
+		writer!!.println(text)
 	}
 	
-	fun trySendMessage(text: Message): Boolean {
+	fun trySendMessage(text: String): Boolean {
 		try {
 			sendMessage(text)
 		} catch (e: Exception) {
@@ -143,12 +143,12 @@ class COClient(var listener: Listener?) {
 	
 	@Throws(NullPointerException::class)
 	fun kick(user: String, reason: String) {
-		sendMessage(Message("$user:$reason", MessageType.Kick))
+		sendMessage(Message("$user:$reason", MessageType.Kick).toString())
 	}
 	
 	@Throws(NullPointerException::class)
 	fun broadcast(text: String) {
-		sendMessage(Message(text, MessageType.Broadcast))
+		sendMessage(Message(text, MessageType.Broadcast).toString())
 	}
 	
 	private fun receiveMessageHandler() {

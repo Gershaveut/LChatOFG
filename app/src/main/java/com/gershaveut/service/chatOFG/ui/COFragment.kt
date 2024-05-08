@@ -94,11 +94,11 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		buttonSend.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
-				val message = Message(editMessage.text.toString())
+				val text = editMessage.text.toString()
 				
-				if (message.text.isNotEmpty()) {
-					if (coClient.trySendMessage(message)) {
-						Log.d(coTag, "send_message: $message")
+				if (text.isNotEmpty()) {
+					if (coClient.trySendMessage(text)) {
+						Log.d(coTag, "send_message: $text")
 						chatScrollView.fullScroll(View.FOCUS_DOWN)
 					} else
 						snackbar(requireActivity().getString(R.string.co_error_send))

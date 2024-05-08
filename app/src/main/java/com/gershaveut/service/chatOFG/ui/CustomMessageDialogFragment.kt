@@ -27,7 +27,7 @@ class CustomMessageDialogFragment : DialogFragment() {
 			.setView(view)
 			.setPositiveButton(R.string.co_send) { _, _ ->
 				lifecycleScope.launch(Dispatchers.IO) {
-					(parentFragmentManager.primaryNavigationFragment as COFragment).coClient.sendMessage(Message(view.findViewById<EditText>(R.id.edit_custom_message_text).text.toString(), spinnerMessageType.selectedItem as MessageType))
+					(parentFragmentManager.primaryNavigationFragment as COFragment).coClient.sendMessage(Message(view.findViewById<EditText>(R.id.edit_custom_message_text).text.toString(), spinnerMessageType.selectedItem as MessageType).toString())
 				}
 			}
 			.setNegativeButton(R.string.dialog_cancel, null)
