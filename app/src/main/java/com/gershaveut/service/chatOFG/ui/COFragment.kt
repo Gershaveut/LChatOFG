@@ -11,9 +11,12 @@ import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
 import android.util.Log
+import android.view.KeyboardShortcutGroup
+import android.view.KeyboardShortcutInfo
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.gershaveut.coapikt.Message
@@ -36,8 +39,10 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private val binding get() = _binding!!
 	
 	lateinit var coClient: COClient
+	
 	private lateinit var preferences: SharedPreferences
 	private val connectionsType = object : TypeToken<ArrayList<Connection>>() {}.type
+	private var broadcastDialog: AlertDialog? = null
 	
 	
 	private val root: View get() = binding.root
@@ -48,6 +53,8 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	
 	private val connectingBar get() = coMenu.connectingBar
 	private val viewSwitcher get() = binding.viewSwitcher
+	
+	private val menuSideSheet get() = coContent.menuSideSheet
 	private val recyclerUsers get() = coContent.recyclerUsers
 	private val recyclerConnections get() = coMenu.recyclerConnections
 	
@@ -130,12 +137,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			userAdapter.users = savedInstanceState.getStringArrayList("recyclerUsers")!!
 		}
 		
-		if (Debug.isDebuggerConnected()) {
-			connectionAdapter.registerConnection(Connection("192.168.1.82", 7500, "User"))
-			connectionAdapter.registerConnection(Connection("192.168.1.120", 7500, "User"))
-			connectionAdapter.registerConnection(Connection("10.0.0.193", 7500, "User"))
-		}
-		
 		return root
 	}
 	
@@ -183,13 +184,13 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			when (message.messageType) {
 				MessageType.Error -> snackbar(message.text)
 				MessageType.Join -> {
-					if (!users.equals(userName)) {
+					if (!users.contains(userName)) {
 						users.add(userName)
 						userAdapter.notifyItemInserted(users.size - 1)
 					}
 				}
 				MessageType.Leave -> {
-					if (!users.equals(userName)) {
+					if (!users.contains(userName)) {
 						val index = users.indexOf(userName)
 						
 						if (index != -1) {
@@ -199,10 +200,14 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					}
 				}
 				MessageType.Broadcast -> {
-					AlertDialog.Builder(activity)
-						.setTitle(R.string.co_broadcast)
-						.setMessage(message.text)
-						.create().show()
+					if (broadcastDialog?.isShowing != true) {
+						broadcastDialog = AlertDialog.Builder(activity)
+							.setTitle(R.string.co_broadcast)
+							.setMessage(message.text)
+							.create()
+						
+						broadcastDialog!!.show()
+					}
 				}
 				else -> {
 					viewChat.append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text)

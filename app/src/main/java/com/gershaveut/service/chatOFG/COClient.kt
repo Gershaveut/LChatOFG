@@ -7,7 +7,7 @@ import kotlinx.coroutines.*
 import java.io.*
 import java.net.Socket
 import java.net.SocketAddress
-//TODO: Remove extra exceptions
+
 class COClient(var listener: Listener?) {
 	var name: String? = null
 	private var socket: Socket = Socket()
