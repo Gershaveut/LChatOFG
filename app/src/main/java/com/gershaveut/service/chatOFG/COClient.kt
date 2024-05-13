@@ -163,7 +163,7 @@ class COClient(var listener: Listener?) {
 			while (socket.isConnected) {
 				val message = Message.createMessageFromText(reader!!.readLine())
 				
-				if (message.equals(MessageType.Kick)) {
+				if (message.messageType == MessageType.Kick) {
 					reason = message.text
 					break
 				}
