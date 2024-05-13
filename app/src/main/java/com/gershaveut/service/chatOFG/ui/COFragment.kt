@@ -144,8 +144,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		outState.putCharSequence("viewChat", viewChat.text)
 		outState.putStringArrayList("recyclerUsers", userAdapter.users)
 		
-		Log.i(coTag, Gson().toJson(connectionAdapter.connections, connectionsType))
-		
 		preferences.edit()
 			.putString("connections", Gson().toJson(connectionAdapter.connections, connectionsType))
 			.apply()
@@ -190,7 +188,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					}
 				}
 				MessageType.Leave -> {
-					if (!users.contains(userName)) {
+					if (users.contains(userName)) {
 						val index = users.indexOf(userName)
 						
 						if (index != -1) {
