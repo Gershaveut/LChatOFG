@@ -161,7 +161,7 @@ class COClient(var listener: Listener?) {
 		
 		try {
 			while (socket.isConnected) {
-				val message = Message.createMessageFromText(reader!!.readLine())
+				val message = Message.parseMessage(reader!!.readLine())
 				
 				if (message.messageType == MessageType.Kick) {
 					reason = message.text
