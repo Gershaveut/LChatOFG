@@ -10,6 +10,8 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
@@ -17,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.core.text.color
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.gershaveut.coapikt.Message
@@ -208,7 +211,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					}
 				}
 				else -> {
-					viewChat.append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text)
+					viewChat.append(SpannableStringBuilder()
+						.color(message.color!!.hashCode()) { append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text) })
+					
 					chatScrollView.fullScroll(View.FOCUS_DOWN)
 				}
 			}
