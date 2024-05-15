@@ -210,14 +210,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					}
 				}
 				else -> {
-					val appendText = if (viewChat.text.isEmpty()) message.text else "\n" + message.text
-					
-					viewChat.append(SpannableStringBuilder().color(
-						try {
-							Color.rgb(message.color[0], message.color[1], message.color[2])
-						} catch (_: Exception) {
-							Color.BLACK
-						} ) { append(appendText) })
+					viewChat.append(SpannableStringBuilder().color(message.color ?: Color.BLACK) { append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text) })
 					
 					chatScrollView.fullScroll(View.FOCUS_DOWN)
 				}
