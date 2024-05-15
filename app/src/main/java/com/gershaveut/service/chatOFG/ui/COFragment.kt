@@ -7,9 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
@@ -17,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.core.text.color
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.gershaveut.coapikt.Message
@@ -144,8 +148,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		outState.putCharSequence("viewChat", viewChat.text)
 		outState.putStringArrayList("recyclerUsers", userAdapter.users)
 		
-		Log.i(coTag, Gson().toJson(connectionAdapter.connections, connectionsType))
-		
 		preferences.edit()
 			.putString("connections", Gson().toJson(connectionAdapter.connections, connectionsType))
 			.apply()
@@ -176,22 +178,20 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	override fun onMessage(message: Message) {
 		Log.d(coTag, "receive_message: $message")
 		
-		val userName = message.text.split(' ')[0]
-		
 		requireActivity().runOnUiThread {
 			val users = userAdapter.users
 			
 			when (message.messageType) {
 				MessageType.Error -> snackbar(message.text)
 				MessageType.Join -> {
-					if (!users.contains(userName)) {
-						users.add(userName)
+					if (!users.contains(message.text)) {
+						users.add(message.text)
 						userAdapter.notifyItemInserted(users.size - 1)
 					}
 				}
 				MessageType.Leave -> {
-					if (!users.contains(userName)) {
-						val index = users.indexOf(userName)
+					if (users.contains(message.text)) {
+						val index = users.indexOf(message.text)
 						
 						if (index != -1) {
 							userAdapter.notifyItemRemoved(index)
@@ -210,7 +210,15 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					}
 				}
 				else -> {
-					viewChat.append(if (viewChat.text.isEmpty()) message.text else "\n" + message.text)
+					val appendText = if (viewChat.text.isEmpty()) message.text else "\n" + message.text
+					
+					viewChat.append(SpannableStringBuilder().color(
+						try {
+							Color.rgb(message.color[0], message.color[1], message.color[2])
+						} catch (_: Exception) {
+							Color.BLACK
+						} ) { append(appendText) })
+					
 					chatScrollView.fullScroll(View.FOCUS_DOWN)
 				}
 			}
