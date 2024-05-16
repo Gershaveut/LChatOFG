@@ -46,7 +46,7 @@ class CustomMessageDialogFragment : DialogFragment() {
 			.setView(view)
 			.setPositiveButton(R.string.co_send) { _, _ ->
 				lifecycleScope.launch(Dispatchers.IO) {
-					(parentFragmentManager.primaryNavigationFragment as COFragment).coClient.sendMessage(
+					(parentFragmentManager.primaryNavigationFragment as COFragment).coClient!!.sendMessage(
 						if (checkCustomMessage.isChecked) {
 							Message.parseMessage(editCustomMessage.text.toString())
 						} else {

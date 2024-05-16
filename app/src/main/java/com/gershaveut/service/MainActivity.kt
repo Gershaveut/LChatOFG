@@ -1,5 +1,7 @@
 package com.gershaveut.service
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +37,11 @@ class MainActivity : AppCompatActivity() {
 		)
 		setupActionBarWithNavController(navController, appBarConfiguration)
 		navView.setupWithNavController(navController)
+		
+		val mChannel = NotificationChannel(coChatId, getString(R.string.menu_chat_ofg), NotificationManager.IMPORTANCE_DEFAULT)
+		
+		val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+		notificationManager.createNotificationChannel(mChannel)
 	}
 	
 	override fun onCreateOptionsMenu(menu: Menu): Boolean {

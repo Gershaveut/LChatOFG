@@ -2,6 +2,7 @@ package com.gershaveut.service.chatOFG.ui
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Notification
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -35,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.SocketAddress
 
@@ -42,7 +44,10 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private var _binding: FragmentCoBinding? = null
 	private val binding get() = _binding!!
 	
-	lateinit var coClient: COClient
+	lateinit var coServiceIntent: Intent
+	
+	var coService: COService? = null
+	var coClient: COClient? = null
 	
 	private lateinit var preferences: SharedPreferences
 	private val connectionsType = object : TypeToken<ArrayList<Connection>>() {}.type
@@ -83,9 +88,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		preferences = context.getSharedPreferences(coTag, Context.MODE_PRIVATE)
 		
-		Intent(requireActivity(), COService::class.java).also {
-			context.bindService(it, this, Context.BIND_AUTO_CREATE)
-		}
+		coServiceIntent = Intent(requireActivity(), COService::class.java)
 	}
 	
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -101,7 +104,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 				val text = editMessage.text.toString()
 				
 				if (text.isNotEmpty()) {
-					if (coClient.trySendMessage(text)) {
+					if (coClient!!.trySendMessage(text)) {
 						Log.d(coTag, "send_message: $text")
 						chatScrollView.fullScroll(View.FOCUS_DOWN)
 					} else
@@ -122,7 +125,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		coContent.buttonDisconnect.setOnClickListener {
 			lifecycleScope.launch(Dispatchers.IO) {
-				coClient.disconnect()
+				coClient!!.disconnect()
 			}
 		}
 		
@@ -161,12 +164,28 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		_binding = null
 	}
 	
-	suspend fun tryConnect(endpoint: SocketAddress) : Boolean {
+	fun startCoService(context: Context) {
+		context.startForegroundService(coServiceIntent)
+		context.bindService(coServiceIntent, this, Context.BIND_AUTO_CREATE)
+	}
+	
+	suspend fun tryConnect(endpoint: SocketAddress, name: String?) : Boolean {
 		requireActivity().runOnUiThread {
 			connectingBar.visibility = View.VISIBLE
 		}
 		
-		val result = coClient.tryConnect(endpoint)
+		val splitSocketAddress = endpoint.toString().split(':')
+		val hostname = splitSocketAddress[0]
+		
+		coServiceIntent.putExtra("endpoint", "${hostname.split("/")[if (hostname.startsWith("/")) 1 else 0]}:${splitSocketAddress[1].toInt()} ${name}")
+		startCoService(requireContext())
+		
+		while (coClient == null) {
+			delay(1000)
+		}
+		
+		coClient!!.name = name
+		val result = coClient!!.tryConnect(endpoint)
 		
 		requireActivity().runOnUiThread {
 			connectingBar.visibility = View.INVISIBLE
@@ -230,10 +249,10 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		requireActivity().runOnUiThread {
 			viewSwitcher.showNext()
 			
-			val splitSocketAddress = coClient.lastConnect.toString().split(':')
+			val splitSocketAddress = coClient!!.lastConnect.toString().split(':')
 			val hostname = splitSocketAddress[0]
 			
-			connectionAdapter.registerConnection(Connection(hostname.split("/")[if (hostname.startsWith("/")) 1 else 0], splitSocketAddress[1].toInt(), coClient.name))
+			connectionAdapter.registerConnection(Connection(hostname.split("/")[if (hostname.startsWith("/")) 1 else 0], splitSocketAddress[1].toInt(), coClient!!.name))
 		}
 	}
 	
@@ -259,7 +278,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					.setMessage(reason)
 					.setPositiveButton(R.string.co_reconnect) { _, _ ->
 						lifecycleScope.launch(Dispatchers.IO) {
-							if (!coClient.tryReconnect())
+							if (!coClient!!.tryReconnect())
 								requireActivity().runOnUiThread {
 									reconnectDialog.show()
 								}
@@ -267,16 +286,18 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 					}
 					.create().show()
 			}
+			
+			coService!!.stopSelf()
 		}
 	}
 	
 	override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-		val coService = (service as COService.LocalBinder).getService()
+		coService = (service as COService.LocalBinder).getService()
 		
-		coClient = coService.coClient
-		coClient.listener = this
+		coClient = coService!!.coClient
+		coClient!!.listener = this
 		
-		if (coClient.isConnected)
+		if (coClient!!.isConnected)
 			viewSwitcher.showNext()
 	}
 	

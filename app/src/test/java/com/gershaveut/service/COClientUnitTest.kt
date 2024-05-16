@@ -15,4 +15,11 @@ class COClientUnitTest {
 			coClient.connect(InetSocketAddress("127.0.0.1", 7500))
 		}
 	}
+	
+	@Test
+	fun utilTest() {
+		for (i in 1..100) {
+			println(notificationId)
+		}
+	}
 }

@@ -45,14 +45,10 @@ class ConnectionAdapter(private val context: Context, var connections: ArrayList
 			popupMenu.menu.add(0, MenuID.Connect.ordinal, Menu.NONE, R.string.co_connect)
 			popupMenu.menu.add(0, MenuID.Remove.ordinal, Menu.NONE, R.string.co_remove)
 			
-			val coClient = coFragment.coClient
-			
 			popupMenu.setOnMenuItemClickListener {
 				when (it.itemId) {
 					MenuID.Connect.ordinal -> (context as MainActivity).lifecycleScope.launch(Dispatchers.IO) {
-						coClient.name = connection.userName
-						
-						if (!coFragment.tryConnect(InetSocketAddress(connection.hostname, connection.port)))
+						if (!coFragment.tryConnect(InetSocketAddress(connection.hostname, connection.port), connection.userName))
 							coFragment.snackbar(R.string.login_error_connect)
 					}
 					MenuID.Remove.ordinal -> {

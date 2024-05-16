@@ -33,7 +33,7 @@ class KickDialogFragment() : TextInputDialogFragment() {
 	
 	override fun onConfirm(text: String) {
 		lifecycleScope.launch(Dispatchers.IO) {
-			(parentFragmentManager.primaryNavigationFragment!!.childFragmentManager.primaryNavigationFragment as COFragment).coClient.kick(userName, text)
+			(parentFragmentManager.primaryNavigationFragment!!.childFragmentManager.primaryNavigationFragment as COFragment).coClient!!.kick(userName, text)
 		}
 	}
 }

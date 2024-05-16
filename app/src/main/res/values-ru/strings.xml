@@ -29,4 +29,5 @@
 	<string name="co_custom_message">Своё сообщение</string>
     <string name="text">Текст</string>
     <string name="login_no_name">Без имени</string>
+    <string name="co_service">Соединение активно</string>
 </resources>

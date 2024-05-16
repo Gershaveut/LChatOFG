@@ -11,7 +11,7 @@ class BroadcastDialogFragment : TextInputDialogFragment() {
 	
 	override fun onConfirm(text: String) {
 		lifecycleScope.launch(Dispatchers.IO) {
-			(parentFragmentManager.primaryNavigationFragment as COFragment).coClient.broadcast(text)
+			(parentFragmentManager.primaryNavigationFragment as COFragment).coClient!!.broadcast(text)
 		}
 	}
 }
