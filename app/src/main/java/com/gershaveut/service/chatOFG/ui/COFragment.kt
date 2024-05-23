@@ -44,9 +44,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private var _binding: FragmentCoBinding? = null
 	private val binding get() = _binding!!
 	
-	lateinit var coServiceIntent: Intent
+	private lateinit var coServiceIntent: Intent
+	private var coService: COService? = null
 	
-	var coService: COService? = null
 	var coClient: COClient? = null
 	
 	private lateinit var preferences: SharedPreferences
@@ -89,6 +89,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		preferences = context.getSharedPreferences(coTag, Context.MODE_PRIVATE)
 		
 		coServiceIntent = Intent(requireActivity(), COService::class.java)
+		context.bindService(coServiceIntent, this, Context.BIND_IMPORTANT)
 	}
 	
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -137,7 +138,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			CustomMessageDialogFragment().show(parentFragmentManager, null)
 		}
 		
-		connectionAdapter.connections = Gson().fromJson(preferences.getString("connections", ""), connectionsType)
+		Gson().fromJson<ArrayList<Connection>>(preferences.getString("connections", ""), connectionsType)?.let {
+			connectionAdapter.connections = it
+		}
 		
 		if (savedInstanceState != null) {
 			viewChat.text = savedInstanceState.getCharSequence("viewChat")
@@ -164,9 +167,13 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		_binding = null
 	}
 	
-	fun startCoService(context: Context) {
+	suspend fun startCoService(context: Context) {
 		context.startForegroundService(coServiceIntent)
-		context.bindService(coServiceIntent, this, Context.BIND_AUTO_CREATE)
+		context.bindService(coServiceIntent, this, Context.BIND_IMPORTANT)
+		
+		while (coClient == null) {
+			delay(1000)
+		}
 	}
 	
 	suspend fun tryConnect(endpoint: SocketAddress, name: String?) : Boolean {
@@ -179,10 +186,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		coServiceIntent.putExtra("endpoint", "${hostname.split("/")[if (hostname.startsWith("/")) 1 else 0]}:${splitSocketAddress[1].toInt()} ${name}")
 		startCoService(requireContext())
-		
-		while (coClient == null) {
-			delay(1000)
-		}
 		
 		coClient!!.name = name
 		val result = coClient!!.tryConnect(endpoint)

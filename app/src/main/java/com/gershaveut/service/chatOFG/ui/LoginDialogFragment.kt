@@ -65,6 +65,8 @@ class LoginDialogFragment : DialogFragment() {
 						name = null
 					
 					lifecycleScope.launch(Dispatchers.IO) {
+						coFragment.startCoService(requireContext())
+						
 						if (!coFragment.coClient!!.isConnecting) {
 							if (coFragment.tryConnect(InetSocketAddress(hostname, port.toInt()), name)) {
 								dialog.dismiss()
