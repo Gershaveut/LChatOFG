@@ -9,17 +9,28 @@ import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Debug
 import android.os.IBinder
-import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.util.Log
-import android.view.KeyboardShortcutGroup
-import android.view.KeyboardShortcutInfo
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.text.color
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -48,6 +59,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private val connectionsType = object : TypeToken<ArrayList<Connection>>() {}.type
 	private var broadcastDialog: AlertDialog? = null
 	
+	var connections = listOf(Connection("test1", 932, "Test"), Connection("test2", 567, null))
 	
 	private val root: View get() = binding.root
 	
@@ -69,6 +81,56 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	private val viewChat get() = coChat.viewChat
 	private val buttonSend get() = coChat.buttonSend
 	private val chatScrollView get() = coChat.chatScrollView
+	
+	@OptIn(ExperimentalLayoutApi::class)
+	@Preview(device = "spec:width=411dp,height=891dp")
+	@Composable
+	fun CODrawer() {
+		Surface(modifier = Modifier.fillMaxSize()) {
+			Column(
+				horizontalAlignment = Alignment.CenterHorizontally
+			) {
+				LinearProgressIndicator(
+					modifier = Modifier.padding(bottom = 20.dp).fillMaxWidth())
+				Text(
+					stringResource(R.string.co_no_connection),
+					textAlign = TextAlign.Center,
+					modifier = Modifier.padding(bottom = 20.dp))
+				Button(
+					{ },
+					modifier = Modifier.padding(bottom = 16.dp)
+				) {
+					Text(stringResource(R.string.co_connect), fontSize = 18.sp)
+				}
+				
+				HorizontalDivider()
+				
+				Text(
+					stringResource(R.string.co_history),
+					modifier = Modifier.padding(top = 16.dp))
+				LazyColumn(
+					modifier = Modifier.padding(top = 16.dp)
+				) {
+					items(connections) { connection ->
+						FlowColumn (
+							horizontalArrangement = Arrangement.Center,
+							modifier = Modifier.fillMaxWidth().height(35.dp)
+						) {
+							Text(connection.userName ?: "null")
+							Text("${connection.hostname}:${connection.port}", fontSize = 12.sp, color = androidx.compose.ui.graphics.Color.Gray)
+							
+							TextButton(
+								{},
+								contentPadding = PaddingValues(),
+							) {
+								Image(ImageVector.vectorResource(R.drawable.ic_more), null)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	fun snackbar(text: String) {
 		Snackbar.make(binding.root, text, 1000).show()

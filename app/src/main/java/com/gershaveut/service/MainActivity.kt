@@ -2,7 +2,9 @@ package com.gershaveut.service
 
 import android.os.Bundle
 import android.view.Menu
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.Surface
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -10,6 +12,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.gershaveut.service.databinding.ActivityMainBinding
+import com.gershaveut.service.ui.theme.ServiceTheme
 import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -18,6 +21,14 @@ class MainActivity : AppCompatActivity() {
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		
+		setContent {
+			ServiceTheme {
+				Surface {
+				
+				}
+			}
+		}
 		
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
