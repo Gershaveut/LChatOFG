@@ -61,12 +61,12 @@ class LoginDialogFragment : DialogFragment() {
 				val name = editName.text.toString()
 				
 				if (hostname.isNotEmpty() && port.isNotEmpty() && (name.isNotEmpty() || checkNoName.isChecked)) {
-					if (!checkNoName.isChecked)
-						coFragment.coClient.name = editName.text.toString()
+					if (checkNoName.isChecked)
+						coFragment.coClient.name = null
 					
 					lifecycleScope.launch(Dispatchers.IO) {
 						if (!coFragment.coClient.isConnecting) {
-							if (coFragment.tryConnect(InetSocketAddress(hostname, port.toInt()))) {
+							if (coFragment.tryConnect(InetSocketAddress(hostname, port.toInt()), name)) {
 								dialog.dismiss()
 							} else
 								snackbar(R.string.login_error_connect)

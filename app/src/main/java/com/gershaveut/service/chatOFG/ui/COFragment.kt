@@ -84,6 +84,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		preferences = context.getSharedPreferences(coTag, Context.MODE_PRIVATE)
 		
 		Intent(requireActivity(), COService::class.java).also {
+			context.startService(it)
 			context.bindService(it, this, Context.BIND_AUTO_CREATE)
 		}
 	}
@@ -161,11 +162,12 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		_binding = null
 	}
 	
-	suspend fun tryConnect(endpoint: SocketAddress) : Boolean {
+	suspend fun tryConnect(endpoint: SocketAddress, userName: String?) : Boolean {
 		requireActivity().runOnUiThread {
 			connectingBar.visibility = View.VISIBLE
 		}
 		
+		coClient.name = userName
 		val result = coClient.tryConnect(endpoint)
 		
 		requireActivity().runOnUiThread {
