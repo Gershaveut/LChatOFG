@@ -9,7 +9,7 @@
 		android:fitsSystemWindows="true"
 		tools:openDrawer="end"
 		tools:ignore="VisualLintTextFieldSize">
-	<include layout="@layout/co_chat" android:id="@+id/co_chat"/>
+	<androidx.compose.ui.platform.ComposeView android:id="@+id/co_drawer" android:layout_height="match_parent" android:layout_width="match_parent"/>
 	<LinearLayout
 			android:id="@+id/menu_side_sheet"
 			app:layout_behavior="com.google.android.material.sidesheet.SideSheetBehavior"
