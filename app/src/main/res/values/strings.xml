@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Service</string>
+    <string name="app_name" translatable="false">ChatOFG</string>
     <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
     <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
     <string name="nav_header_title" translatable="false">Android Studio</string>
@@ -35,4 +35,5 @@
     <string name="co_custom_message">Custom message</string>
     <string name="text">Text</string>
     <string name="login_no_name">No name</string>
+    <string name="co_users">Users</string>
 </resources>
