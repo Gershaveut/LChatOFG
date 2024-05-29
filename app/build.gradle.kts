@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.gershaveut.service"
+    namespace = "com.gershaveut.co"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.gershaveut.service"
+        applicationId = "com.gershaveut.co"
 		minSdk = 26
 		targetSdk = 34
         versionCode = 1

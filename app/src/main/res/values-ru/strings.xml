@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">Service</string>
-	<string name="login_hostname">IP Адрес (домен)</string>
+    <string name="login_hostname">IP Адрес (домен)</string>
 	<string name="action_settings">Настройки</string>
 	<string name="login_port">Порт</string>
 	<string name="login_name">Имя</string>

@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Service"
+rootProject.name = "ChatOFG"
 include(":app")

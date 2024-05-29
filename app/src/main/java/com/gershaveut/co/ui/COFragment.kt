@@ -183,7 +183,6 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 				
 				Button( {
 						openLoginDialog.value = true
-						LoginDialogFragment().show(parentFragmentManager, null)
 					}, modifier = Modifier.padding(bottom = 16.dp)
 				) {
 					Text(stringResource(R.string.co_connect), fontSize = 18.sp)
@@ -249,20 +248,20 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 									
 									popupMenu.menu.add(
 										0,
-										ConnectionAdapter.MenuID.Connect.ordinal,
+										MenuID.Connect.ordinal,
 										Menu.NONE,
 										R.string.co_connect
 									)
 									popupMenu.menu.add(
 										0,
-										ConnectionAdapter.MenuID.Remove.ordinal,
+										MenuID.Remove.ordinal,
 										Menu.NONE,
 										R.string.co_remove
 									)
 									
 									popupMenu.setOnMenuItemClickListener {
 										when (it.itemId) {
-											ConnectionAdapter.MenuID.Connect.ordinal -> (context as MainActivity).lifecycleScope.launch(
+											MenuID.Connect.ordinal -> (context as MainActivity).lifecycleScope.launch(
 												Dispatchers.IO
 											) {
 												if (!tryConnect(
@@ -273,7 +272,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 												) snackbar(R.string.login_error_connect)
 											}
 											
-											ConnectionAdapter.MenuID.Remove.ordinal -> {
+											MenuID.Remove.ordinal -> {
 												val index = connections.indexOf(connection)
 												
 												//connections.removeAt(index)
@@ -411,10 +410,11 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 								}
 							}
 							
+							val chatBoxModifier = Modifier.sizeIn(maxWidth = 350.dp).padding(top = 5.dp, start = 5.dp)
+							
 							if (chatMessage.isRemote) {
 								Box(
-									modifier = Modifier
-										.padding(top = 5.dp, end = 75.dp, start = 5.dp)
+									modifier = chatBoxModifier
 										.background(
 											color = Color(238, 238, 238),
 											shape = RoundedCornerShape(10.dp)
@@ -423,12 +423,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 									messageContent(chatMessage)
 								}
 							} else {
-								val isScreenLarge = LocalConfiguration.current.screenWidthDp > 600
-								
-								Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (isScreenLarge) Arrangement.Start else Arrangement.End) {
+								Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (LocalConfiguration.current.screenWidthDp > 600) Arrangement.Start else Arrangement.End) {
 									Box(
-										modifier = Modifier
-											.padding(if (isScreenLarge) PaddingValues(top = 5.dp, end = 75.dp, start = 5.dp) else PaddingValues(top = 5.dp, start = 75.dp, end = 5.dp))
+										modifier = chatBoxModifier
 											.background(
 												color = Color(199, 225, 252),
 												shape = RoundedCornerShape(10.dp)
@@ -453,8 +450,7 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 								.fillMaxWidth(),
 							placeholder = { Text(stringResource(R.string.co_message)) }
 						)
-						IconButton(
-							{
+						IconButton( {
 							
 							},
 							modifier = Modifier.size(50.dp)
@@ -468,6 +464,11 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 	}
 	
 	class ChatMessage(var text: String, var isRemote: Boolean = true, @DrawableRes var id: Int? = null, var owner: String? = null)
+	
+	enum class MenuID {
+		Connect,
+		Remove
+	}
 	
 	fun snackbar(text: String) {
 		Snackbar.make(binding.root, text, 1000).show()
@@ -495,9 +496,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 		
 		//_binding = FragmentCoBinding.inflate(inflater, container, false)
 		
-		val root = inflater.inflate(R.layout.co_content, container, false)
+		val root = inflater.inflate(R.layout.fragment_co, container, false)
 		
-		root.findViewById<ComposeView>(R.id.co_drawer).apply {
+		root.findViewById<ComposeView>(R.id.co_compose_view).apply {
 			setContent {
 				Menu()
 			}
