@@ -1,4 +1,4 @@
-package com.gershaveut.service.chatOFG
+package com.gershaveut.co
 
 import com.gershaveut.coapikt.Message
 import com.gershaveut.coapikt.MessageType

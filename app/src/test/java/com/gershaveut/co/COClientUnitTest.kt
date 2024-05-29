@@ -1,6 +1,6 @@
 package com.gershaveut.service
 
-import com.gershaveut.service.chatOFG.COClient
+import com.gershaveut.co.COClient
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.net.InetSocketAddress

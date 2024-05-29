@@ -1,4 +1,4 @@
-package com.gershaveut.service
+package com.gershaveut.co
 
 import android.os.Debug
 

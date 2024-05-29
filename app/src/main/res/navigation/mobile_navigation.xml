@@ -5,6 +5,6 @@
             android:id="@+id/mobile_navigation"
             app:startDestination="@id/COFragment">
     
-    <fragment android:id="@+id/COFragment" android:name="com.gershaveut.service.chatOFG.ui.COFragment"
+    <fragment android:id="@+id/COFragment" android:name="com.gershaveut.co.chat.ChatFragment"
               android:label="@string/menu_chat_ofg" tools:layout="@layout/fragment_co"/>
 </navigation>

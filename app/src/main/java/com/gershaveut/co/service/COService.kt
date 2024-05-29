@@ -1,10 +1,10 @@
-package com.gershaveut.service.service
+package com.gershaveut.co.service
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.gershaveut.service.chatOFG.COClient
+import com.gershaveut.co.COClient
 
 class COService : Service() {
 	private val binder = LocalBinder()
