@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
@@ -422,10 +423,12 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 									messageContent(chatMessage)
 								}
 							} else {
-								Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+								val isScreenLarge = LocalConfiguration.current.screenWidthDp > 600
+								
+								Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (isScreenLarge) Arrangement.Start else Arrangement.End) {
 									Box(
 										modifier = Modifier
-											.padding(top = 5.dp, start = 75.dp, end = 5.dp)
+											.padding(if (isScreenLarge) PaddingValues(top = 5.dp, end = 75.dp, start = 5.dp) else PaddingValues(top = 5.dp, start = 75.dp, end = 5.dp))
 											.background(
 												color = Color(199, 225, 252),
 												shape = RoundedCornerShape(10.dp)
