@@ -20,7 +20,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,26 +32,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DrawerDefaults
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -61,12 +58,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -79,6 +74,7 @@ import com.gershaveut.co.components.COAlertDialog
 import com.gershaveut.co.components.RightModalNavigationDrawer
 import com.gershaveut.co.service.COService
 import com.gershaveut.coapikt.Message
+import com.gershaveut.coapikt.MessageType
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -124,8 +120,8 @@ class ChatFragment : Fragment(), COClient.Listener, ServiceConnection {
 					COAlertDialog(
 						stringResource(R.string.login_login),
 						confirmText = stringResource(R.string.login_login),
-						onDismissRequest = {},
-						onConfirmRequest = {},
+						onDismissRequest = { openLoginDialog.value = false },
+						onConfirmRequest = { openLoginDialog.value = false },
 						content = {
 							val hostname = remember { mutableStateOf("") }
 							val port = remember { mutableStateOf("") }
@@ -174,49 +170,28 @@ class ChatFragment : Fragment(), COClient.Listener, ServiceConnection {
 								)
 							}
 							
-							IconButton(
-								{
-									val popupMenu = PopupMenu(context, requireView())
-									
-									popupMenu.menu.add(
-										0,
-										MenuID.Connect.ordinal,
-										Menu.NONE,
-										R.string.co_connect
-									)
-									popupMenu.menu.add(
-										0,
-										MenuID.Remove.ordinal,
-										Menu.NONE,
-										R.string.co_remove
-									)
-									
-									popupMenu.setOnMenuItemClickListener {
-										when (it.itemId) {
-											MenuID.Connect.ordinal -> (context as MainActivity).lifecycleScope.launch(
-												Dispatchers.IO
-											) {
-												//if (!tryConnect(InetSocketAddress(connection.hostname, connection.port), connection.userName))
-												//snackbar(R.string.login_error_connect)
-											}
-											
-											MenuID.Remove.ordinal -> {
-												val index = connections.indexOf(connection)
-												
-												//connections.removeAt(index)
-											}
-										}
-										
-										return@setOnMenuItemClickListener true
-									}
-									
-									popupMenu.show()
-								},
-								modifier = Modifier
-									.size(30.dp)
-									.align(Alignment.CenterEnd)
-							) {
-								Icon(Icons.Outlined.MoreVert, null)
+							val expandedConnection = remember { mutableStateOf(false) }
+							
+							Column(modifier = Modifier.align(Alignment.CenterEnd)) {
+								IconButton(
+									{
+										expandedConnection.value = true
+									},
+									modifier = Modifier
+										.size(30.dp)
+								) {
+									Icon(Icons.Outlined.MoreVert, null)
+								}
+								DropdownMenu(
+									expanded = expandedConnection.value,
+									onDismissRequest = { expandedConnection.value = false }) {
+									DropdownMenuItem(
+										text = { Text(stringResource(R.string.co_connect)) },
+										onClick = { TODO("Connect") })
+									DropdownMenuItem(
+										text = { Text(stringResource(R.string.co_remove)) },
+										onClick = { TODO("Connection remove") })
+								}
 							}
 						}
 					}
@@ -225,6 +200,7 @@ class ChatFragment : Fragment(), COClient.Listener, ServiceConnection {
 		}
 	}
 	
+	@OptIn(ExperimentalMaterial3Api::class)
 	@Preview(device = "spec:width=411dp,height=891dp")
 	@Composable
 	fun Chat() {
@@ -233,22 +209,116 @@ class ChatFragment : Fragment(), COClient.Listener, ServiceConnection {
 				drawerContent = {
 					ModalDrawerSheet(modifier = Modifier.width(250.dp)) {
 						Column(horizontalAlignment = Alignment.CenterHorizontally) {
+							val openBroadcastDialog = remember { mutableStateOf(false) }
+							val openCustomDialog = remember { mutableStateOf(false) }
+							
+							if (openBroadcastDialog.value) {
+								COAlertDialog(
+									title = stringResource(R.string.co_broadcast),
+									onDismissRequest = { openBroadcastDialog.value = false },
+									onConfirmRequest = {
+										openBroadcastDialog.value = false; TODO("Send broadcast")
+									},
+									content = {
+										val message = remember { mutableStateOf("") }
+										
+										TextField(
+											message.value, { text ->
+												message.value = text
+											},
+											placeholder = { Text(stringResource(R.string.co_message)) }
+										)
+									})
+							}
+							
+							val message = remember { mutableStateOf("") }
+							val selectedType = remember { mutableStateOf(MessageType.entries[0]) }
+							
+							if (openCustomDialog.value == false) {
+								COAlertDialog(
+									title = stringResource(R.string.co_custom_message),
+									onDismissRequest = { openCustomDialog.value = false },
+									onConfirmRequest = {
+										openCustomDialog.value = false; TODO("Send custom message")
+									},
+									content = {
+										val custom = remember { mutableStateOf(false) }
+										val expanded = remember { mutableStateOf(false) }
+										
+										Row(verticalAlignment = Alignment.CenterVertically) {
+											Checkbox(
+												checked = custom.value,
+												onCheckedChange = { custom.value = it })
+											Text(
+												stringResource(R.string.co_custom_message),
+												fontSize = 16.sp
+											)
+										}
+										
+										TextField(
+											message.value, { text ->
+												message.value = text
+											},
+											placeholder = { Text(stringResource(R.string.co_message)) }
+										)
+										
+										if (!custom.value) {
+											ExposedDropdownMenuBox(
+												expanded = expanded.value,
+												onExpandedChange = {
+													expanded.value = !expanded.value
+												}) {
+												TextField(
+													readOnly = true,
+													modifier = Modifier.menuAnchor(),
+													onValueChange = {},
+													value = selectedType.value.toString(),
+													trailingIcon = {
+														ExposedDropdownMenuDefaults.TrailingIcon(
+															expanded = expanded.value
+														)
+													},
+												)
+												
+												ExposedDropdownMenu(
+													expanded = expanded.value,
+													onDismissRequest = {
+														expanded.value = false
+													}) {
+													MessageType.entries.forEach {
+														DropdownMenuItem(
+															text = { Text(it.name) },
+															contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+															onClick = {
+																selectedType.value = it
+															})
+													}
+												}
+											}
+										}
+									})
+							}
+							
+							
 							Button(
-								{}, modifier = Modifier
+								{
+									TODO("Disconnect")
+								}, modifier = Modifier
 									.fillMaxWidth()
 									.padding(horizontal = 5.dp)
 							) {
 								Text(stringResource(R.string.co_disconnect))
 							}
-							Button(
-								{}, modifier = Modifier
-									.fillMaxWidth()
-									.padding(horizontal = 5.dp)
+							Button({
+								openBroadcastDialog.value = true
+							}
 							) {
 								Text(stringResource(R.string.co_broadcast_send))
 							}
 							Button(
-								{}, modifier = Modifier
+								{
+									TODO("Send custom message")
+								}, modifier = Modifier
 									.fillMaxWidth()
 									.padding(horizontal = 5.dp)
 							) {
@@ -475,7 +545,7 @@ class ChatFragment : Fragment(), COClient.Listener, ServiceConnection {
 		var owner: String? = null
 	)
 	
-	enum class MenuID {
+	enum class MenuId {
 		Connect,
 		Remove
 	}
