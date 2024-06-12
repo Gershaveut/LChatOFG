@@ -135,7 +135,9 @@ class COFragment : Fragment(), COClient.Listener, ServiceConnection {
 			CustomMessageDialogFragment().show(parentFragmentManager, null)
 		}
 		
-		connectionAdapter.connections = Gson().fromJson(preferences.getString("connections", ""), connectionsType)
+		Gson().fromJson<ArrayList<Connection>>(preferences.getString("connections", ""), connectionsType)?.let {
+			connectionAdapter.connections = it
+		}
 		
 		if (savedInstanceState != null) {
 			viewChat.text = savedInstanceState.getCharSequence("viewChat")
